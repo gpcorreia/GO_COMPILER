@@ -15,7 +15,6 @@ hexstring           0[xX]{hex}
 sinal               [+-]
 exp                 [eE]{sinal}?{decimal}
 
-
 ids                 {letra}({letra}|{decimal})*
 intlit              {decimal}|{octalstring}|{hexstring}
 reallit             {decimal}"."{decimal}?{exp}?|{decimal}{exp}|"."{decimal}{exp}?
@@ -29,7 +28,7 @@ comma               ","
 blankid             "_"     
 assign              "="     
 star                "*"     
-div                 "/"     
+div                 "/"    
 minus               "-"     
 plus                "+"     
 eq                  "=="     
@@ -113,14 +112,13 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {reallit}           {printf("REALLIT(%s)\n",yytext); countColumns();}
 {reserved}          {printf("RESERVED(%s)\n",yytext); countColumns();}
 {whitespace}        {countColumns();}
-{newline}           {countLines();}
+{newline}           {columns = 1; countLines();}
 
 
 .                   {printf("Line <%d>, column <%d>: illegal character (%s)\n",lines,columns,yytext);}
 
-{comment}   {BEGIN COMMENT ;} 
-<COMMENT>
-<COMMENT>{newline} {BEGIN 0; }
+{comment}           {BEGIN COMMENT ;} 
+<COMMENT>{newline}  {BEGIN 0; }
 
 
 
