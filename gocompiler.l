@@ -79,7 +79,7 @@ endline             "\r\n"|"\n"
 
 reserved            break|default|interface|select|case|defer|go|map|struct|chan|goto|switch|const|fallthrough|range|type|continue|import|"++"|"--"
 
-%X STARTCOMMENT NEWLINE QUOTATIONMARKS
+%X STARTCOMMENT NEWLINE QUOTATIONMARKS RETURN
 %%
 {semicolon}                         {helpoutput("SEMICOLON\n",0);}
 {comma}                             {helpoutput("COMMA\n",2); }
@@ -150,7 +150,9 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 
 %%
 
+
 void helpoutput(char * string,int state){
+    
 
     countColumns();
     printf("%s",string);
@@ -162,6 +164,10 @@ void helpoutput(char * string,int state){
     else if(state == 1){
         insertSemicolon = 1;
     }
+    else if(state == 2 && insertSemicolon==1){
+        insertSemicolon = 0 ;
+    }
+
 }
 
 void helperrorstate(int state){
@@ -203,16 +209,14 @@ void helperrorString(int state){
 
 
 void checknewLine(){
-    
-    countLines();
 
-    if(insertSemicolon == 1 && isComment != 0){
+    if(insertSemicolon == 1 && isComment == 0){
         printf("SEMICOLON\n");
+        insertSemicolon = 0;
     }
-
-    isComment = 0;
     columns = 1;
 
+    countLines();
 }
 
 
