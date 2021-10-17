@@ -3,7 +3,9 @@
     int lines = 1;
     int insertSemicolon = 0;
     int isComment = 0;
-    char result[100] = "";
+    int saveMarks = 0;
+    int saveComm = 0;
+    char final[100] = "";
     void countColumns();
     void countLines();
     void checknewLine();
@@ -124,7 +126,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-\"                                  {BEGIN STRLIT ; }
+{marks}                             {BEGIN STRLIT ; saveMarks = columns;}
 {intlit}                            {printf("INTLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reallit}                           {printf("REALLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reserved}                          {printf("RESERVED(%s)\n",yytext); countColumns();}
@@ -132,7 +134,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
 {comment}.*                         {isComment = 1;}
-{startcomment}                      {isComment = 1; BEGIN STARTCOMMENT ;}
+{startcomment}                      {isComment = 1; saveComm=columns; BEGIN STARTCOMMENT ;}
 
 
 <STARTCOMMENT>.                     {;}
@@ -140,11 +142,11 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
 <STARTCOMMENT>{endcomment}          { BEGIN 0; }
 
-<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",result); result[0] = '\0'; BEGIN 0; /*   String aceite */}
+<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",final); final[0] = '\0'; BEGIN 0; /*   String aceite */}
 <STRLIT>{endline}           { helperrorString(0); BEGIN 0 ; }
 <STRLIT><<EOF>>             { helperrorString(0); BEGIN 0 ; }
 <STRLIT>{invalidescape}     { helperrorString(1); }
-<STRLIT>{strlit}			{ strcat(result,yytext); countColumns();}
+<STRLIT>{strlit}			{ strcat(final,yytext); countColumns();}
 <STRLIT>.                   {;}
 
 
@@ -177,7 +179,8 @@ void helperrorstate(int state){
         countColumns();
     }
     else if( state == 1){
-        printf("Line %d, column %d: unterminated comment\n",lines,columns);
+        printf("Line %d, column %d: unterminated comment\n",lines,saveComm);
+        saveComm = 0;
     }
 
 
@@ -192,7 +195,8 @@ void helperrorIntegerLiterals(){
 void helperrorString(int state){
 
     if(state == 0){
-        printf("Line %d, column %d: unterminated string literal\n",lines,columns);
+        printf("Line %d, column %d: unterminated string literal\n",lines,saveMarks);
+        saveMarks = 0;
     }
 
     else if(state == 1){
