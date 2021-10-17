@@ -12,7 +12,7 @@
     void helperrorString(int state);
     void helperrorIntegerLiterals();
 %}
-letra               [a-zA-Z"_"] 
+letra               [a-zA-Z_] 
 decimal             [0-9]+
 octal               [0-7]+
 hex                 [0-9A-Fa-f]+
@@ -124,10 +124,10 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
+\"                                  {BEGIN STRLIT ; }
 {intlit}                            {printf("INTLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reallit}                           {printf("REALLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reserved}                          {printf("RESERVED(%s)\n",yytext); countColumns();}
-{marks}                             { BEGIN STRLIT ;}
 {ids}                               {printf("ID(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
@@ -140,12 +140,10 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
 <STARTCOMMENT>{endcomment}          { BEGIN 0; }
 
-
-<STRLIT>" "	                { BEGIN 0; }
-<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",result); BEGIN 0; /*   String aceite */}
-<STRLIT>{newline}           { helperrorString(0); BEGIN 0 ; }
+<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",result); result[0] = '\0'; BEGIN 0; /*   String aceite */}
+<STRLIT>{endline}           { helperrorString(0); BEGIN 0 ; }
 <STRLIT><<EOF>>             { helperrorString(0); BEGIN 0 ; }
-<STRLIT>{invalidescape}     { helperrorString(1); BEGIN 0 ; }
+<STRLIT>{invalidescape}     { helperrorString(1); }
 <STRLIT>{strlit}			{ strcat(result,yytext); countColumns();}
 <STRLIT>.                   {;}
 
@@ -194,7 +192,7 @@ void helperrorIntegerLiterals(){
 void helperrorString(int state){
 
     if(state == 0){
-        printf("Line %d, column %d: unterminated string literal (%s)\n",lines,columns,yytext);
+        printf("Line %d, column %d: unterminated string literal\n",lines,columns);
     }
 
     else if(state == 1){
