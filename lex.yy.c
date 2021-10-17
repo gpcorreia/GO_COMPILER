@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -46,6 +46,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -154,7 +155,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 typedef size_t yy_size_t;
 #endif
 
-extern int yyleng;
+extern yy_size_t yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -197,7 +198,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -266,8 +267,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = NULL; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int yyleng;
+static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
+yy_size_t yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = NULL;
@@ -294,7 +295,7 @@ static void yy_init_buffer ( YY_BUFFER_STATE b, FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string ( const char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len  );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, yy_size_t len  );
 
 void *yyalloc ( yy_size_t  );
 void *yyrealloc ( void *, yy_size_t  );
@@ -347,7 +348,7 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
  */
 #define YY_DO_BEFORE_ACTION \
 	(yytext_ptr) = yy_bp; \
-	yyleng = (int) (yy_cp - yy_bp); \
+	yyleng = (yy_size_t) (yy_cp - yy_bp); \
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
@@ -667,7 +668,9 @@ char *yytext;
     int lines = 1;
     int insertSemicolon = 0;
     int isComment = 0;
-    char result[100] = "";
+    int saveMarks = 0;
+    int saveComm = 0;
+    char final[100] = "";
     void countColumns();
     void countLines();
     void checknewLine();
@@ -675,9 +678,9 @@ char *yytext;
     void helperrorstate(int state);
     void helperrorString(int state);
     void helperrorIntegerLiterals();
-#line 679 "lex.yy.c"
-
 #line 681 "lex.yy.c"
+
+#line 683 "lex.yy.c"
 
 #define INITIAL 0
 #define STARTCOMMENT 1
@@ -720,7 +723,7 @@ FILE *yyget_out ( void );
 
 void yyset_out  ( FILE * _out_str  );
 
-			int yyget_leng ( void );
+			yy_size_t yyget_leng ( void );
 
 char *yyget_text ( void );
 
@@ -789,7 +792,7 @@ static int input ( void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		int n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -898,9 +901,9 @@ YY_DECL
 		}
 
 	{
-#line 87 "gocompiler.l"
+#line 89 "gocompiler.l"
 
-#line 904 "lex.yy.c"
+#line 906 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -959,307 +962,307 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 88 "gocompiler.l"
+#line 90 "gocompiler.l"
 {helpoutput("SEMICOLON\n",0);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 89 "gocompiler.l"
+#line 91 "gocompiler.l"
 {helpoutput("COMMA\n",0); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 90 "gocompiler.l"
+#line 92 "gocompiler.l"
 {helpoutput("BLANKID\n",0); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 91 "gocompiler.l"
+#line 93 "gocompiler.l"
 {helpoutput("ASSIGN\n",0); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 92 "gocompiler.l"
+#line 94 "gocompiler.l"
 {helpoutput("STAR\n",0); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 93 "gocompiler.l"
+#line 95 "gocompiler.l"
 {helpoutput("DIV\n",0); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 94 "gocompiler.l"
+#line 96 "gocompiler.l"
 {helpoutput("MINUS\n",0); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 95 "gocompiler.l"
+#line 97 "gocompiler.l"
 {helpoutput("PLUS\n",0); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 96 "gocompiler.l"
+#line 98 "gocompiler.l"
 {helpoutput("EQ\n",0); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 97 "gocompiler.l"
+#line 99 "gocompiler.l"
 {helpoutput("GE\n",0); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 98 "gocompiler.l"
+#line 100 "gocompiler.l"
 {helpoutput("GT\n",0);} 
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 99 "gocompiler.l"
+#line 101 "gocompiler.l"
 {helpoutput("LBRACE\n",0); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 100 "gocompiler.l"
+#line 102 "gocompiler.l"
 {helpoutput("LE\n",0); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 101 "gocompiler.l"
+#line 103 "gocompiler.l"
 {helpoutput("LPAR\n",0);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 102 "gocompiler.l"
+#line 104 "gocompiler.l"
 {helpoutput("LSQ\n",0); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 103 "gocompiler.l"
+#line 105 "gocompiler.l"
 {helpoutput("LT\n",0); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 104 "gocompiler.l"
+#line 106 "gocompiler.l"
 {helpoutput("MOD\n",0); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 105 "gocompiler.l"
+#line 107 "gocompiler.l"
 {helpoutput("NE\n",0); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 106 "gocompiler.l"
+#line 108 "gocompiler.l"
 {helpoutput("NOT\n",0); } 
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 107 "gocompiler.l"
+#line 109 "gocompiler.l"
 {helpoutput("AND\n",0); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 108 "gocompiler.l"
+#line 110 "gocompiler.l"
 {helpoutput("OR\n",0); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 109 "gocompiler.l"
+#line 111 "gocompiler.l"
 {helpoutput("RBRACE\n",1);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 110 "gocompiler.l"
+#line 112 "gocompiler.l"
 {helpoutput("RPAR\n",1);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 111 "gocompiler.l"
+#line 113 "gocompiler.l"
 {helpoutput("RSQ\n",1);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 112 "gocompiler.l"
+#line 114 "gocompiler.l"
 {helpoutput("PACKAGE\n",0);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 113 "gocompiler.l"
+#line 115 "gocompiler.l"
 {helpoutput("RETURN\n",1);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 114 "gocompiler.l"
+#line 116 "gocompiler.l"
 {helpoutput("ELSE\n",0);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 115 "gocompiler.l"
+#line 117 "gocompiler.l"
 {helpoutput("FOR\n",0);}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 116 "gocompiler.l"
+#line 118 "gocompiler.l"
 {helpoutput("IF\n",0);}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 117 "gocompiler.l"
+#line 119 "gocompiler.l"
 {helpoutput("VAR\n",0);}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 118 "gocompiler.l"
+#line 120 "gocompiler.l"
 {helpoutput("INT\n",0);}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 119 "gocompiler.l"
+#line 121 "gocompiler.l"
 {helpoutput("FLOAT32\n",0);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 120 "gocompiler.l"
+#line 122 "gocompiler.l"
 {helpoutput("BOOL\n",0);}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 121 "gocompiler.l"
+#line 123 "gocompiler.l"
 {helpoutput("STRING\n",0);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 122 "gocompiler.l"
+#line 124 "gocompiler.l"
 {helpoutput("PRINT\n",0);}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 123 "gocompiler.l"
+#line 125 "gocompiler.l"
 {helpoutput("PARSEINT\n",0);}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 124 "gocompiler.l"
+#line 126 "gocompiler.l"
 {helpoutput("FUNC\n",0);}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 125 "gocompiler.l"
+#line 127 "gocompiler.l"
 {helpoutput("CMDARGS\n",0);}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 126 "gocompiler.l"
+#line 128 "gocompiler.l"
 {helperrorIntegerLiterals();}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 127 "gocompiler.l"
-{BEGIN STRLIT ; }
+#line 129 "gocompiler.l"
+{BEGIN STRLIT ; saveMarks = columns;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 128 "gocompiler.l"
+#line 130 "gocompiler.l"
 {printf("INTLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 129 "gocompiler.l"
+#line 131 "gocompiler.l"
 {printf("REALLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 130 "gocompiler.l"
+#line 132 "gocompiler.l"
 {printf("RESERVED(%s)\n",yytext); countColumns();}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 131 "gocompiler.l"
+#line 133 "gocompiler.l"
 {printf("ID(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 132 "gocompiler.l"
+#line 134 "gocompiler.l"
 {countColumns();}
 	YY_BREAK
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 133 "gocompiler.l"
+#line 135 "gocompiler.l"
 {checknewLine();}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 134 "gocompiler.l"
+#line 136 "gocompiler.l"
 {isComment = 1;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 135 "gocompiler.l"
-{isComment = 1; BEGIN STARTCOMMENT ;}
+#line 137 "gocompiler.l"
+{isComment = 1; saveComm=columns; BEGIN STARTCOMMENT ;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 138 "gocompiler.l"
+#line 140 "gocompiler.l"
 {;}
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 139 "gocompiler.l"
+#line 141 "gocompiler.l"
 { countLines(); }
 	YY_BREAK
 case YY_STATE_EOF(STARTCOMMENT):
-#line 140 "gocompiler.l"
+#line 142 "gocompiler.l"
 { helperrorstate(1); BEGIN 0; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 141 "gocompiler.l"
+#line 143 "gocompiler.l"
 { BEGIN 0; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 143 "gocompiler.l"
-{ printf("STRLIT(\"%s\")\n",result); result[0] = '\0'; BEGIN 0; /*   String aceite */}
+#line 145 "gocompiler.l"
+{ printf("STRLIT(\"%s\")\n",final); final[0] = '\0'; BEGIN 0; /*   String aceite */}
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 144 "gocompiler.l"
+#line 146 "gocompiler.l"
 { helperrorString(0); BEGIN 0 ; }
 	YY_BREAK
 case YY_STATE_EOF(STRLIT):
-#line 145 "gocompiler.l"
+#line 147 "gocompiler.l"
 { helperrorString(0); BEGIN 0 ; }
 	YY_BREAK
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 146 "gocompiler.l"
+#line 148 "gocompiler.l"
 { helperrorString(1); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 147 "gocompiler.l"
-{ strcat(result,yytext); countColumns();}
+#line 149 "gocompiler.l"
+{ strcat(final,yytext); countColumns();}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 148 "gocompiler.l"
+#line 150 "gocompiler.l"
 {;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 151 "gocompiler.l"
+#line 153 "gocompiler.l"
 { helperrorstate(0); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 154 "gocompiler.l"
+#line 156 "gocompiler.l"
 ECHO;
 	YY_BREAK
-#line 1263 "lex.yy.c"
+#line 1265 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(NEWLINE):
 case YY_STATE_EOF(RETURN):
@@ -1448,7 +1451,7 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			int num_to_read =
+			yy_size_t num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
@@ -1462,7 +1465,7 @@ static int yy_get_next_buffer (void)
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				yy_size_t new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1520,7 +1523,7 @@ static int yy_get_next_buffer (void)
 
 	if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
-		int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
 		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) yyrealloc(
 			(void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t) new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
@@ -1609,7 +1612,7 @@ static int yy_get_next_buffer (void)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		int number_to_move = (yy_n_chars) + 2;
+		yy_size_t number_to_move = (yy_n_chars) + 2;
 		char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		char *source =
@@ -1660,7 +1663,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (int) ((yy_c_buf_p) - (yytext_ptr));
+			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -2029,12 +2032,12 @@ YY_BUFFER_STATE yy_scan_string (const char * yystr )
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, yy_size_t  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	int i;
+	yy_size_t i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = (yy_size_t) (_yybytes_len + 2);
@@ -2076,7 +2079,7 @@ static void yynoreturn yy_fatal_error (const char* msg )
 	do \
 		{ \
 		/* Undo effects of setting up yytext. */ \
-        int yyless_macro_arg = (n); \
+        yy_size_t yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
 		yytext[yyleng] = (yy_hold_char); \
 		(yy_c_buf_p) = yytext + yyless_macro_arg; \
@@ -2116,7 +2119,7 @@ FILE *yyget_out  (void)
 /** Get the length of the current token.
  * 
  */
-int yyget_leng  (void)
+yy_size_t yyget_leng  (void)
 {
         return yyleng;
 }
@@ -2266,7 +2269,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 154 "gocompiler.l"
+#line 156 "gocompiler.l"
 
 
 void helpoutput(char * string,int state){
@@ -2293,7 +2296,8 @@ void helperrorstate(int state){
         countColumns();
     }
     else if( state == 1){
-        printf("Line %d, column %d: unterminated comment\n",lines,columns);
+        printf("Line %d, column %d: unterminated comment\n",lines,saveComm);
+        saveComm = 0;
     }
 
 
@@ -2308,7 +2312,8 @@ void helperrorIntegerLiterals(){
 void helperrorString(int state){
 
     if(state == 0){
-        printf("Line %d, column %d: unterminated string literal\n",lines,columns);
+        printf("Line %d, column %d: unterminated string literal\n",lines,saveMarks);
+        saveMarks = 0;
     }
 
     else if(state == 1){

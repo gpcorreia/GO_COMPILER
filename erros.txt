@@ -1,0 +1,9 @@
+Literals_1:  erro linha 21 mm erro.
+
+Literals_3:Meter point e virgula depois do uso de aspas 
+
+semicolons_!: meter ponto e virgula a seguir ao right brace
+
+semicolons_2: Meter semi colon depois de um espaço
+
+str_bad: esta tudo na merda
