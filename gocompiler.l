@@ -141,7 +141,6 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT>{endcomment}          { BEGIN 0; }
 
 
-
 <STRLIT>" "	                { BEGIN 0; }
 <STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",result); BEGIN 0; /*   String aceite */}
 <STRLIT>{newline}           { helperrorString(0); BEGIN 0 ; }
@@ -151,7 +150,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STRLIT>.                   {;}
 
 
-.                                   {helperrorstate(0);}
+.                           { helperrorstate(0); }
 
 
 %%
