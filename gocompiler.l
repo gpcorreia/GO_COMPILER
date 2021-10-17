@@ -13,6 +13,9 @@
     void helperrorstate(int state);
     void helperrorString(int state);
     void helperrorIntegerLiterals();
+    void checkEOF();
+    void clearString();
+
 %}
 letra               [a-zA-Z_] 
 decimal             [0-9]+
@@ -81,11 +84,9 @@ osArgs              "os.Args"
 whitespace          " "|"\t"|"\b"
 newline             "\n"    
 endline             "\r\n"|"\n"
-
-
 reserved            break|default|interface|select|case|defer|go|map|struct|chan|goto|switch|const|fallthrough|range|type|continue|import|"++"|"--"
 
-%X STARTCOMMENT NEWLINE STRLIT RETURN
+%X STARTCOMMENT NEWLINE STRLIT RETURN INVALIDSTRLIT
 %%
 {semicolon}                         {helpoutput("SEMICOLON\n",0);}
 {comma}                             {helpoutput("COMMA\n",0); }
@@ -108,7 +109,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {not}                               {helpoutput("NOT\n",0); } 
 {and}                               {helpoutput("AND\n",0); }
 {or}                                {helpoutput("OR\n",0); }
-{rbrace}                            {helpoutput("RBRACE\n",1);}
+{rbrace}                            {helpoutput("RBRACE\n",1);checknewLine();}
 {rpar}                              {helpoutput("RPAR\n",1);}
 {rsq}                               {helpoutput("RSQ\n",1);}
 {package}                           {helpoutput("PACKAGE\n",0);}
@@ -126,7 +127,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-{marks}                             {BEGIN STRLIT ; saveMarks = columns;}
+{marks}                             {BEGIN STRLIT ; saveMarks = columns;countColumns();}
 {intlit}                            {printf("INTLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reallit}                           {printf("REALLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reserved}                          {printf("RESERVED(%s)\n",yytext); countColumns();}
@@ -140,25 +141,46 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT>.                     {;}
 <STARTCOMMENT>{endline}             { countLines(); }
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
-<STARTCOMMENT>{endcomment}          { BEGIN 0; }
+<STARTCOMMENT>{endcomment}          { isComment = 0;BEGIN 0; }
 
-<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",final); final[0] = '\0'; BEGIN 0; /*   String aceite */}
-<STRLIT>{endline}           { helperrorString(0); BEGIN 0 ; }
+<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",final); clearString();countColumns();  BEGIN 0; /*   String aceite */}
+<STRLIT>{endline}           { helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
 <STRLIT><<EOF>>             { helperrorString(0); BEGIN 0 ; }
-<STRLIT>{invalidescape}     { helperrorString(1); }
+<STRLIT>{invalidescape}     { helperrorString(1); BEGIN INVALIDSTRLIT; }
 <STRLIT>{strlit}			{ strcat(final,yytext); countColumns();}
-<STRLIT>.                   {;}
+
+<INVALIDSTRLIT>{marks}             { clearString();countColumns();  BEGIN 0; /*   String aceite */}
+<INVALIDSTRLIT>"\\n"          { BEGIN 0;}
+<INVALIDSTRLIT>{endline}           { helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
+<INVALIDSTRLIT><<EOF>>             { helperrorString(0); BEGIN 0 ; }
+<INVALIDSTRLIT>{invalidescape}     { helperrorString(1); BEGIN INVALIDSTRLIT; }
+<INVALIDSTRLIT>{strlit}			   { countColumns();}
 
 
+<<EOF>>                     {checkEOF(); return yywrap();}
 .                           { helperrorstate(0); }
 
 
+
 %%
+void clearString(){
+
+    for(int i = 0;i<100;i++){
+        
+        final[i]='\0';
+    }
+}
+
+void checkEOF(){
+
+    if (insertSemicolon == 1){
+        printf("SEMICOLON\n");
+        insertSemicolon = 0;
+    }
+}
 
 void helpoutput(char * string,int state){
     
-
-
     countColumns();
     printf("%s",string);
 
@@ -200,8 +222,13 @@ void helperrorString(int state){
     }
 
     else if(state == 1){
+        for (int i = 0; i<=yyleng;i++){
+            if(yytext[i] == '\n'){
+                printf("Line %d, column %d: invalid escape sequence (\\)\n",lines,columns);
+                return;
+            }
+        }
         printf("Line %d, column %d: invalid escape sequence (%s)\n",lines,columns,yytext);
-
     }
 
 }
@@ -209,7 +236,6 @@ void helperrorString(int state){
 
 
 void checknewLine(){
-
     if(insertSemicolon == 1 && isComment == 0){
         printf("SEMICOLON\n");
         insertSemicolon = 0;
@@ -235,6 +261,7 @@ void countColumns(){
 void countLines(){
     if(isComment == 0){
         lines++;
+        columns=1;
     }
 }
 
