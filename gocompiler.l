@@ -3,12 +3,14 @@
     int lines = 1;
     int insertSemicolon = 0;
     int isComment = 0;
+    char result[100] = "";
     void countColumns();
     void countLines();
     void checknewLine();
     void helpoutput(char * string,int state);
     void helperrorstate(int state);
     void helperrorString(int state);
+    void helperrorIntegerLiterals();
 %}
 letra               [a-zA-Z"_"] 
 decimal             [0-9]+
@@ -17,9 +19,11 @@ hex                 [0-9A-Fa-f]+
 
 octalstring         0{octal}
 hexstring           0[xX]{hex}
+octalinvalidestring 0{decimal}*[8-9]+
+
 
 escape              \\n|\\f|\\r|\\\\|\\\"|\\t
-invalidescape		\\[^trnf\"\\]
+invalidescape		\\[^nfrt\\"]
 
 sinal               [+-]
 exp                 [eE]{sinal}?{decimal}
@@ -27,9 +31,9 @@ exp                 [eE]{sinal}?{decimal}
 ids                 {letra}({letra}|{decimal})*
 intlit              {decimal}|{octalstring}|{hexstring}
 reallit             {decimal}"."{decimal}?{exp}?|{decimal}{exp}|"."{decimal}{exp}?
-strlit              ([^\n\r\\\"]|{escape})*
+strlit              ([^\n\r\\"]|{escape}*)
 
-quotationmarks      "\""
+marks               "\""
 startcomment        "/*"
 endcomment          "*/"
 comment             "//"
@@ -79,56 +83,56 @@ endline             "\r\n"|"\n"
 
 reserved            break|default|interface|select|case|defer|go|map|struct|chan|goto|switch|const|fallthrough|range|type|continue|import|"++"|"--"
 
-%X STARTCOMMENT NEWLINE QUOTATIONMARKS RETURN
+%X STARTCOMMENT NEWLINE STRLIT RETURN
 %%
 {semicolon}                         {helpoutput("SEMICOLON\n",0);}
-{comma}                             {helpoutput("COMMA\n",2); }
-{blankid}                           {helpoutput("BLANKID\n",2); }
-{assign}                            {helpoutput("ASSIGN\n",2); }
-{star}                              {helpoutput("STAR\n",2); }
-{div}                               {helpoutput("DIV\n",2); }
-{minus}                             {helpoutput("MINUS\n",2); }
-{plus}                              {helpoutput("PLUS\n",2); }
-{eq}                                {helpoutput("EQ\n",2); }
-{ge}                                {helpoutput("GE\n",2); }
-{gt}                                {helpoutput("GT\n",2);} 
-{lbrace}                            {helpoutput("LBRACE\n",2); }
-{le}                                {helpoutput("LE\n",2); }
-{lpar}                              {helpoutput("LPAR\n",2);}
-{lsq}                               {helpoutput("LSQ\n",2); }
-{lt}                                {helpoutput("LT\n",2); }
-{mod}                               {helpoutput("MOD\n",2); }
-{ne}                                {helpoutput("NE\n",2); }
-{not}                               {helpoutput("NOT\n",2); } 
-{and}                               {helpoutput("AND\n",2); }
-{or}                                {helpoutput("OR\n",2); }
+{comma}                             {helpoutput("COMMA\n",0); }
+{blankid}                           {helpoutput("BLANKID\n",0); }
+{assign}                            {helpoutput("ASSIGN\n",0); }
+{star}                              {helpoutput("STAR\n",0); }
+{div}                               {helpoutput("DIV\n",0); }
+{minus}                             {helpoutput("MINUS\n",0); }
+{plus}                              {helpoutput("PLUS\n",0); }
+{eq}                                {helpoutput("EQ\n",0); }
+{ge}                                {helpoutput("GE\n",0); }
+{gt}                                {helpoutput("GT\n",0);} 
+{lbrace}                            {helpoutput("LBRACE\n",0); }
+{le}                                {helpoutput("LE\n",0); }
+{lpar}                              {helpoutput("LPAR\n",0);}
+{lsq}                               {helpoutput("LSQ\n",0); }
+{lt}                                {helpoutput("LT\n",0); }
+{mod}                               {helpoutput("MOD\n",0); }
+{ne}                                {helpoutput("NE\n",0); }
+{not}                               {helpoutput("NOT\n",0); } 
+{and}                               {helpoutput("AND\n",0); }
+{or}                                {helpoutput("OR\n",0); }
 {rbrace}                            {helpoutput("RBRACE\n",1);}
 {rpar}                              {helpoutput("RPAR\n",1);}
 {rsq}                               {helpoutput("RSQ\n",1);}
-{package}                           {helpoutput("PACKAGE\n",2);}
-{return}                            {helpoutput("RETURN\n",2);}
-{else}                              {helpoutput("ELSE\n",2);}
-{for}                               {helpoutput("FOR\n",2);}
-{if}                                {helpoutput("IF\n",2);}
-{var}                               {helpoutput("VAR\n",2);}
-{int}                               {helpoutput("INT\n",2);}
-{float32}                           {helpoutput("FLOAT32\n",2);}
-{bool}                              {helpoutput("BOOL\n",2);}
-{string}                            {helpoutput("STRING\n",2);}
-{fmtPrintln}                        {helpoutput("PRINT\n",2);}
-{strconvAtoi}                       {helpoutput("PARSEINT\n",2);}
-{func}                              {helpoutput("FUNC\n",2);}
-{osArgs}                            {helpoutput("CMDARGS\n",2);}
-{quotationmarks}                    { BEGIN QUOTATIONMARKS ; }
+{package}                           {helpoutput("PACKAGE\n",0);}
+{return}                            {helpoutput("RETURN\n",1);}
+{else}                              {helpoutput("ELSE\n",0);}
+{for}                               {helpoutput("FOR\n",0);}
+{if}                                {helpoutput("IF\n",0);}
+{var}                               {helpoutput("VAR\n",0);}
+{int}                               {helpoutput("INT\n",0);}
+{float32}                           {helpoutput("FLOAT32\n",0);}
+{bool}                              {helpoutput("BOOL\n",0);}
+{string}                            {helpoutput("STRING\n",0);}
+{fmtPrintln}                        {helpoutput("PRINT\n",0);}
+{strconvAtoi}                       {helpoutput("PARSEINT\n",0);}
+{func}                              {helpoutput("FUNC\n",0);}
+{osArgs}                            {helpoutput("CMDARGS\n",0);}
+{octalinvalidestring}               {helperrorIntegerLiterals();}
 {intlit}                            {printf("INTLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reallit}                           {printf("REALLIT(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {reserved}                          {printf("RESERVED(%s)\n",yytext); countColumns();}
+{marks}                             { BEGIN STRLIT ;}
 {ids}                               {printf("ID(%s)\n",yytext); insertSemicolon = 1; countColumns();}
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
 {comment}.*                         {isComment = 1;}
 {startcomment}                      {isComment = 1; BEGIN STARTCOMMENT ;}
-
 
 
 <STARTCOMMENT>.                     {;}
@@ -138,11 +142,13 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 
 
 
-<QUOTATIONMARKS>{quotationmarks}    { BEGIN 0; /*   String aceite */}
-<QUOTATIONMARKS>{newline}           { helperrorString(0); BEGIN 0 ; }
-<QUOTATIONMARKS><<EOF>>             { helperrorString(0); BEGIN 0 ; }
-<QUOTATIONMARKS>{invalidescape}     { helperrorString(1); BEGIN 0 ; }
-<QUOTATIONMARKS>{strlit}            { BEGIN 0; }
+<STRLIT>" "	                { BEGIN 0; }
+<STRLIT>{marks}             { printf("STRLIT(\"%s\")\n",result); BEGIN 0; /*   String aceite */}
+<STRLIT>{newline}           { helperrorString(0); BEGIN 0 ; }
+<STRLIT><<EOF>>             { helperrorString(0); BEGIN 0 ; }
+<STRLIT>{invalidescape}     { helperrorString(1); BEGIN 0 ; }
+<STRLIT>{strlit}			{ strcat(result,yytext); countColumns();}
+<STRLIT>.                   {;}
 
 
 .                                   {helperrorstate(0);}
@@ -150,9 +156,9 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 
 %%
 
-
 void helpoutput(char * string,int state){
     
+
 
     countColumns();
     printf("%s",string);
@@ -163,9 +169,6 @@ void helpoutput(char * string,int state){
 
     else if(state == 1){
         insertSemicolon = 1;
-    }
-    else if(state == 2 && insertSemicolon==1){
-        insertSemicolon = 0 ;
     }
 
 }
@@ -183,15 +186,10 @@ void helperrorstate(int state){
 
 }
 
-void helperrorIntegerLiterals(int state){
-    if(state == 0){
+void helperrorIntegerLiterals(){
         printf("Line %d, column %d: illegal octal constant (%s)\n",lines,columns,yytext);
         countColumns();
-    }
-    else if( state == 1){
-        printf("Line %d, column %d: illegal hexa constant (%s)\n",lines,columns,yytext);
-
-    }
+    
 }
 
 void helperrorString(int state){
@@ -208,15 +206,18 @@ void helperrorString(int state){
 }
 
 
+
 void checknewLine(){
 
     if(insertSemicolon == 1 && isComment == 0){
         printf("SEMICOLON\n");
         insertSemicolon = 0;
     }
+
     columns = 1;
 
-    countLines();
+     countLines();
+    
 }
 
 
@@ -231,7 +232,9 @@ void countColumns(){
 
 
 void countLines(){
-    lines++;
+    if(isComment == 0){
+        lines++;
+    }
 }
 
 int main()
