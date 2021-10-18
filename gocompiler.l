@@ -112,7 +112,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {not}                               {helpoutput("NOT\n",0); } 
 {and}                               {helpoutput("AND\n",0); }
 {or}                                {helpoutput("OR\n",0); }
-{rbrace}                            {helpoutput("RBRACE\n",1);checknewLine();}
+{rbrace}                            {helpoutput("RBRACE\n",1);}
 {rpar}                              {helpoutput("RPAR\n",1);}
 {rsq}                               {helpoutput("RSQ\n",1);}
 {package}                           {helpoutput("PACKAGE\n",0);}
@@ -130,7 +130,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-{marks}                             {BEGIN STRLIT ; saveMarks = columns;countColumns();}
+{marks}                             {printf("Aspas");BEGIN STRLIT ; saveMarks = columns;countColumns();}
 {intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} countColumns();}
@@ -146,18 +146,22 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
 <STARTCOMMENT>{endcomment}          { isComment = 0;BEGIN 0; }
 
-<STRLIT>{marks}                     { if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} clearString();countColumns();  BEGIN 0; /*   String aceite */}
-<STRLIT>{endline}                   { helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<STRLIT><<EOF>>                     { helperrorString(0); BEGIN 0 ; }
-<STRLIT>{invalidescape}             { helperrorString(1); BEGIN INVALIDSTRLIT; }
+<STRLIT>{marks}                     {printf("FDSS"); if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} clearString();countColumns();insertSemicolon=1;  BEGIN 0; /*   String aceite */}
+<STRLIT>" "                         {printf("OLA");strcat(final,yytext);countColumns();}
+<STRLIT>{endline}                   {printf("BOA"); helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
+<STRLIT><<EOF>>                     {printf("SAN"); helperrorString(0); BEGIN 0 ; }
+<STRLIT>{invalidescape}             { printf("AA %s",yytext);helperrorString(1); BEGIN INVALIDSTRLIT; }
 <STRLIT>{strlit}			        { strcat(final,yytext); countColumns();}
+<STRLIT>.                           {printf("POLÈN");}
 
-<INVALIDSTRLIT>{marks}              { clearString();countColumns();  BEGIN 0; /*   String aceite */}
-<INVALIDSTRLIT>"\\n"                { BEGIN 0;}
-<INVALIDSTRLIT>{endline}            { helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<INVALIDSTRLIT><<EOF>>              { helperrorString(0); BEGIN 0 ; }
-<INVALIDSTRLIT>{invalidescape}      { helperrorString(1); BEGIN INVALIDSTRLIT; }
-<INVALIDSTRLIT>{strlit}			    { countColumns();}
+<INVALIDSTRLIT>{marks}              { printf("EEEE %s",yytext);clearString();countColumns();  BEGIN 0; /*   String aceite */}
+<INVALIDSTRLIT>"\\n"                 {printf("SSSSSS");helperrorString(0); countLines() ; clearString(); BEGIN 0 ;}
+<INVALIDSTRLIT>" "                  {printf("FFFFF");strcat(final,yytext);countColumns();}
+<INVALIDSTRLIT>{invalidescape}      {printf("GGGG %s",yytext);helperrorString(1);BEGIN INVALIDSTRLIT;}
+<INVALIDSTRLIT>{endline}            { printf("SSSSS");helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
+<INVALIDSTRLIT><<EOF>>              { printf("XNXX");helperrorString(0); BEGIN 0 ; }
+<INVALIDSTRLIT>{strlit}			    { printf("NNNNN");countColumns();clearString();}
+<INVALIDSTRLIT>.                    { printf("DDDDDD");}
 
 
 <<EOF>>                             {checkEOF(); return yywrap();}
