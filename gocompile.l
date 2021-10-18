@@ -17,6 +17,8 @@
     int saveMarks = 0;
     int saveComm = 0;
     int hide = 0;
+    int aux = 0;
+    int auxS = 0;
     char final[MAX_STRING] = "";
 
 %}
@@ -130,7 +132,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-{marks}                             {BEGIN STRLIT ; saveMarks = columns;countColumns();}
+{marks}                             {BEGIN STRLIT ; saveMarks = columns; aux = 0; countColumns();}
 {intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} countColumns();}
@@ -146,23 +148,31 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
 <STARTCOMMENT>{endcomment}          { isComment = 0;BEGIN 0; }
 
-<STRLIT>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} clearString();countColumns();insertSemicolon=1;  BEGIN 0; /*   String aceite */}
-<STRLIT>" "                         {strcat(final,yytext);countColumns();}
-<STRLIT>{endline}                   {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<STRLIT><<EOF>>                     {helperrorString(0); BEGIN 0 ; }
-<STRLIT>{invalidescape}             {helperrorString(1); BEGIN INVALIDSTRLIT; }
-<STRLIT>{strlit}			        {strcat(final,yytext); countColumns();}
-<STRLIT>.                           {;}
+<STRLIT>{endline}                   {helperrorstate(0); clearString(); countLines(); BEGIN 0; }
+<STRLIT>{invalidescape}             {helperrorstate(0); clearString(); countColumns(); aux = 1 ;}
+<STRLIT><<EOF>>                     {helperrorString(0); clearString(); BEGIN 0;}
+<STRLIT>{strlit}                    {clearString(); strcat(final,yytext); auxS = 1; countColumns();}
+<STRLIT>{marks}                     {
 
-<INVALIDSTRLIT>{marks}              {clearString();countColumns();  BEGIN 0; /*   String aceite */}
-<INVALIDSTRLIT>"\\n"                {helperrorString(0); countLines() ; clearString(); BEGIN 0 ;}
-<INVALIDSTRLIT>" "                  {strcat(final,yytext);countColumns();}
-<INVALIDSTRLIT>{invalidescape}      {helperrorString(1);BEGIN INVALIDSTRLIT;}
-<INVALIDSTRLIT>{endline}            {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<INVALIDSTRLIT><<EOF>>              {helperrorString(0); BEGIN 0 ; }
-<INVALIDSTRLIT>{strlit}			    {countColumns();clearString();}
-<INVALIDSTRLIT>.                    {;}
-
+                                        if(auxS == 0 && aux == 0){
+                                            if(hide == 0) printf("STRLIT(\"\")\n");
+                                            clearString();
+                                        }
+                                        if(auxS == 1 && aux == 0){
+                                            if(hide == 0) printf("STRLIT(\"%s\")\n",final);
+                                            clearString();
+                                        }
+                                        if(auxS == 1 && aux == 1){
+                                            clearString();
+                                            aux = 0;
+                                            auxS = 0;
+                                            BEGIN 0;
+                                        }
+                                        clearString();
+                                        countColumns();
+                                        aux = 0;
+                                        auxS = 0;
+}
 
 <<EOF>>                             {checkEOF(); return yywrap();}
 .                                   { helperrorstate(0); }
