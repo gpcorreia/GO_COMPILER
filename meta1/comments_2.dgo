@@ -15,7 +15,7 @@ func //factorial(n int) int {
 */
 
 func /*main()*/ {
-    var /*argument int;
-    argument,_ =*/ strconv.Atoi(os.Args[1]);
+    var 8/*argument int;
+    argument,_ = strconv.Atoi(os.Args[1]);
     fmt.Println(factorial(argument));
 }; // IGNORAR (= 1982uoij

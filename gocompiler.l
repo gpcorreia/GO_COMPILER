@@ -16,7 +16,9 @@
     int isComment = 0;
     int saveMarks = 0;
     int saveComm = 0;
+    int saveLines = 0;
     int hide = 0;
+    int checkmarks = 0;
     char final[MAX_STRING] = "";
 
 %}
@@ -27,11 +29,11 @@ hex                 [0-9A-Fa-f]+
 
 octalstring         0{octal}
 hexstring           0[xX]{hex}
-octalinvalidestring 0{decimal}*[8-9]+
+octalinvalidestring 0(([0-9])*([8-9])([0-9])*([8-9])*)
 
 
 escape              \\n|\\f|\\r|\\\\|\\\"|\\t
-invalidescape		\\[^nfrt\\"]
+invalidescape		\\[^nfrt\\"]?
 
 sinal               [+-]
 exp                 [eE]{sinal}?{decimal}
@@ -39,7 +41,7 @@ exp                 [eE]{sinal}?{decimal}
 ids                 {letra}({letra}|{decimal})*
 intlit              {decimal}|{octalstring}|{hexstring}
 reallit             {decimal}"."{decimal}?{exp}?|{decimal}{exp}|"."{decimal}{exp}?
-strlit              ([^\n\r\\"]|{escape}*)
+strlit              ([^\n\r\\\"]|{escape}*)
 
 marks               "\""
 startcomment        "/*"
@@ -85,14 +87,13 @@ strconvAtoi         "strconv.Atoi"
 func                "func"    
 osArgs              "os.Args" 
 whitespace          " "|"\t"|"\b"
-newline             "\n"    
-endline             "\r\n"|"\n"
+newline             "\n"|"\r\n"    
 reserved            break|default|interface|select|case|defer|go|map|struct|chan|goto|switch|const|fallthrough|range|type|continue|import|"++"|"--"
 
 %X STARTCOMMENT NEWLINE STRLIT RETURN INVALIDSTRLIT
 %%
-{semicolon}                         {if(hide == 0) helpoutput("SEMICOLON\n",0);}
-{comma}                             {if(hide == 0) helpoutput("COMMA\n",0); }
+{semicolon}                         {helpoutput("SEMICOLON\n",0);}
+{comma}                             {helpoutput("COMMA\n",0); }
 {blankid}                           {helpoutput("BLANKID\n",0); }
 {assign}                            {helpoutput("ASSIGN\n",0); }
 {star}                              {helpoutput("STAR\n",0); }
@@ -130,38 +131,39 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0);}
 {osArgs}                            {helpoutput("CMDARGS\n",0);}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-{marks}                             {BEGIN STRLIT ; saveMarks = columns;countColumns();}
+{marks}                             {saveMarks = columns;countColumns(); checkmarks=1 ;BEGIN STRLIT ; }
 {intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
-{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} countColumns();}
+{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} insertSemicolon=0; countColumns();}
 {ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
 {comment}.*                         {isComment = 1;}
-{startcomment}                      {isComment = 1; saveComm=columns; BEGIN STARTCOMMENT ;}
+{startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 
 
-<STARTCOMMENT>.                     {;}
-<STARTCOMMENT>{endline}             { countLines(); }
-<STARTCOMMENT><<EOF>>               { helperrorstate(1); BEGIN 0; }
-<STARTCOMMENT>{endcomment}          { isComment = 0;BEGIN 0; }
+<STARTCOMMENT><<EOF>>               { helperrorstate(1); insertSemicolon =0; BEGIN 0; }
+<STARTCOMMENT>.                     { countColumns();}
+<STARTCOMMENT>{newline}             { countLines(); }
+<STARTCOMMENT>{endcomment}          { countColumns(); isComment = 0;BEGIN 0; }
 
-<STRLIT>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} clearString();countColumns();insertSemicolon=1;  BEGIN 0; /*   String aceite */}
-<STRLIT>" "                         {strcat(final,yytext);countColumns();}
-<STRLIT>{endline}                   {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<STRLIT><<EOF>>                     {helperrorString(0); BEGIN 0 ; }
-<STRLIT>{invalidescape}             {helperrorString(1); BEGIN INVALIDSTRLIT; }
+<STRLIT>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} clearString();countColumns();insertSemicolon=1; checkmarks=0;  BEGIN 0;}
+<STRLIT>{whitespace}                {strcat(final,yytext);countColumns();}
+<STRLIT>{newline}                   {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
+<STRLIT><<EOF>>                     {helperrorString(0); checkmarks= 0;BEGIN 0 ; }
+<STRLIT>{invalidescape}             {helperrorString(1);  countColumns(); BEGIN INVALIDSTRLIT; }
 <STRLIT>{strlit}			        {strcat(final,yytext); countColumns();}
-<STRLIT>.                           {;}
+<STRLIT>.                           {countColumns();}
 
-<INVALIDSTRLIT>{marks}              {clearString();countColumns();  BEGIN 0; /*   String aceite */}
-<INVALIDSTRLIT>"\\n"                {helperrorString(0); countLines() ; clearString(); BEGIN 0 ;}
-<INVALIDSTRLIT>" "                  {strcat(final,yytext);countColumns();}
-<INVALIDSTRLIT>{invalidescape}      {helperrorString(1);BEGIN INVALIDSTRLIT;}
-<INVALIDSTRLIT>{endline}            {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<INVALIDSTRLIT><<EOF>>              {helperrorString(0); BEGIN 0 ; }
+
+<INVALIDSTRLIT>{marks}              {clearString();countColumns(); checkmarks= 0; BEGIN 0; /*   String aceite */}
+<INVALIDSTRLIT>"\\"{newline}        {helperrorString(1); if(checkmarks== 1) helperrorString(0); countLines() ; clearString();  BEGIN 0 ;}
+<INVALIDSTRLIT>{whitespace}         {strcat(final,yytext);countColumns();}
+<INVALIDSTRLIT>{invalidescape}      {helperrorString(1); countColumns(); BEGIN INVALIDSTRLIT;}
+<INVALIDSTRLIT>{newline}            {helperrorString(0); countLines() ; clearString(); checkmarks= 0; BEGIN 0 ; }
+<INVALIDSTRLIT><<EOF>>              {helperrorString(0); checkmarks= 0; BEGIN 0 ; }
 <INVALIDSTRLIT>{strlit}			    {countColumns();clearString();}
-<INVALIDSTRLIT>.                    {;}
+<INVALIDSTRLIT>.                    {countColumns();}
 
 
 <<EOF>>                             {checkEOF(); return yywrap();}
@@ -195,8 +197,9 @@ void helperrorstate(int state){
         countColumns();
     }
     else if( state == 1){
-        if(hide == 0 || hide == 1) printf("Line %d, column %d: unterminated comment\n",lines,saveComm);
+        if(hide == 0 || hide == 1) printf("Line %d, column %d: unterminated comment\n",saveLines,saveComm);
         saveComm = 0;
+        saveLines = 0;
     }
 
 
@@ -267,10 +270,8 @@ void countColumns(){
 
 
 void countLines(){
-    if(isComment == 0){
         lines++;
         columns=1;
-    }
 }
 
 int main(int argc, char *argv[])
