@@ -1,6 +1,6 @@
 %{  
-    #define MAX_STRING 100
-
+    #include "y.tab.h"
+    #define MAX_STRING 100 
     void countColumns();
     void countLines();
     void checknewLine();
@@ -90,56 +90,58 @@ whitespace          " "|"\t"|"\b"
 newline             "\n"|"\r\n"    
 reserved            break|default|interface|select|case|defer|go|map|struct|chan|goto|switch|const|fallthrough|range|type|continue|import|"++"|"--"
 
-%X STARTCOMMENT NEWLINE STRLIT RETURN INVALIDSTRLIT
+%X INCOMMENT STARTCOMMENT NEWLINE STRLIT RETURN INVALIDSTRLIT 
 %%
-{semicolon}                         {helpoutput("SEMICOLON\n",0);}
-{comma}                             {helpoutput("COMMA\n",0); }
-{blankid}                           {helpoutput("BLANKID\n",0); }
-{assign}                            {helpoutput("ASSIGN\n",0); }
-{star}                              {helpoutput("STAR\n",0); }
-{div}                               {helpoutput("DIV\n",0); }
-{minus}                             {helpoutput("MINUS\n",0); }
-{plus}                              {helpoutput("PLUS\n",0); }
-{eq}                                {helpoutput("EQ\n",0); }
-{ge}                                {helpoutput("GE\n",0); }
-{gt}                                {helpoutput("GT\n",0);} 
-{lbrace}                            {helpoutput("LBRACE\n",0); }
-{le}                                {helpoutput("LE\n",0); }
-{lpar}                              {helpoutput("LPAR\n",0);}
-{lsq}                               {helpoutput("LSQ\n",0); }
-{lt}                                {helpoutput("LT\n",0); }
-{mod}                               {helpoutput("MOD\n",0); }
-{ne}                                {helpoutput("NE\n",0); }
-{not}                               {helpoutput("NOT\n",0); } 
-{and}                               {helpoutput("AND\n",0); }
-{or}                                {helpoutput("OR\n",0); }
-{rbrace}                            {helpoutput("RBRACE\n",1);}
-{rpar}                              {helpoutput("RPAR\n",1);}
-{rsq}                               {helpoutput("RSQ\n",1);}
-{package}                           {helpoutput("PACKAGE\n",0);}
-{return}                            {helpoutput("RETURN\n",1);}
-{else}                              {helpoutput("ELSE\n",0);}
-{for}                               {helpoutput("FOR\n",0);}
-{if}                                {helpoutput("IF\n",0);}
-{var}                               {helpoutput("VAR\n",0);}
-{int}                               {helpoutput("INT\n",0);}
-{float32}                           {helpoutput("FLOAT32\n",0);}
-{bool}                              {helpoutput("BOOL\n",0);}
-{string}                            {helpoutput("STRING\n",0);}
-{fmtPrintln}                        {helpoutput("PRINT\n",0);}
-{strconvAtoi}                       {helpoutput("PARSEINT\n",0);}
-{func}                              {helpoutput("FUNC\n",0);}
-{osArgs}                            {helpoutput("CMDARGS\n",0);}
+{semicolon}                         {helpoutput("SEMICOLON\n",0); return SEMICOLON;}
+{comma}                             {helpoutput("COMMA\n",0); return COMMA; }
+{blankid}                           {helpoutput("BLANKID\n",0); return BLANKID;}
+{assign}                            {helpoutput("ASSIGN\n",0); return ASSIGN;}
+{star}                              {helpoutput("STAR\n",0); return STAR;}
+{div}                               {helpoutput("DIV\n",0); return DIV;}
+{minus}                             {helpoutput("MINUS\n",0); return MINUS;}
+{plus}                              {helpoutput("PLUS\n",0); return PLUS;}
+{eq}                                {helpoutput("EQ\n",0); return EQ;}
+{ge}                                {helpoutput("GE\n",0); return GE;}
+{gt}                                {helpoutput("GT\n",0); return GT;} 
+{lbrace}                            {helpoutput("LBRACE\n",0); return LBRACE;}
+{le}                                {helpoutput("LE\n",0); return LE;}
+{lpar}                              {helpoutput("LPAR\n",0); return LPAR;}
+{lsq}                               {helpoutput("LSQ\n",0); return LSQ;}
+{lt}                                {helpoutput("LT\n",0); return LT;}
+{mod}                               {helpoutput("MOD\n",0); return MOD;}
+{ne}                                {helpoutput("NE\n",0); return NE;}
+{not}                               {helpoutput("NOT\n",0); return NOT;} 
+{and}                               {helpoutput("AND\n",0); return AND;}
+{or}                                {helpoutput("OR\n",0); return OR;}
+{rbrace}                            {helpoutput("RBRACE\n",1); return RBRACE;}
+{rpar}                              {helpoutput("RPAR\n",1); return RPAR;}
+{rsq}                               {helpoutput("RSQ\n",1); return RSQ;}
+{package}                           {helpoutput("PACKAGE\n",0); return PACKAGE;}
+{return}                            {helpoutput("RETURN\n",1); return RETURN;}
+{else}                              {helpoutput("ELSE\n",0); return ELSE;}
+{for}                               {helpoutput("FOR\n",0); return FOR;}
+{if}                                {helpoutput("IF\n",0); return IF;}
+{var}                               {helpoutput("VAR\n",0); return VAR;}
+{int}                               {helpoutput("INT\n",0); return INT;}
+{float32}                           {helpoutput("FLOAT32\n",0); return FLOAT32;}
+{bool}                              {helpoutput("BOOL\n",0); return BOOL;}
+{string}                            {helpoutput("STRING\n",0); return STRING;}
+{fmtPrintln}                        {helpoutput("PRINT\n",0); return PRINT;}
+{strconvAtoi}                       {helpoutput("PARSEINT\n",0); return PARSEINT;}
+{func}                              {helpoutput("FUNC\n",0); return FUNC;}
+{osArgs}                            {helpoutput("CMDARGS\n",0); return CMDARGS;}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
 {marks}                             {saveMarks = columns;countColumns(); checkmarks=1 ;BEGIN STRLIT ; }
-{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
-{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
+{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return INTLIT;}
+{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return REALLIT;}
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} insertSemicolon=0; countColumns();}
-{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} insertSemicolon = 1; countColumns();}
+{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return ID;}
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
-{comment}.*                         {isComment = 1;}
+{comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
+
+
 
 
 <STARTCOMMENT><<EOF>>               { helperrorstate(1); insertSemicolon =0; BEGIN 0; }
@@ -175,7 +177,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 void helpoutput(char * string,int state){
     
     countColumns();
-    
+
 
     if(hide == 0)
         printf("%s",string);
@@ -282,12 +284,12 @@ int main(int argc, char *argv[])
     }
 
     yylex();
+    yyparse();
 
     return 0;
 
 
 }
-
 
 int yywrap()
 {
