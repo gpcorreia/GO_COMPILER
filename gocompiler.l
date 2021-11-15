@@ -22,6 +22,7 @@
     char final[MAX_STRING] = "";
 
 %}
+
 letra               [a-zA-Z_] 
 decimal             [0-9]+
 octal               [0-7]+
@@ -132,10 +133,10 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {osArgs}                            {helpoutput("CMDARGS\n",0); return CMDARGS;}
 {octalinvalidestring}               {helperrorIntegerLiterals();}
 {marks}                             {saveMarks = columns;countColumns(); checkmarks=1 ;BEGIN STRLIT ; }
-{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return INTLIT;}
-{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return REALLIT;}
-{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} insertSemicolon=0; countColumns();}
-{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} insertSemicolon = 1; countColumns(); return ID;}
+{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); return INTLIT;}
+{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); return REALLIT;}
+{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon=0; countColumns();}
+{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); return ID;}
 {whitespace}                        {countColumns();}
 {newline}                           {checknewLine();}
 {comment}.*                         {;}
@@ -235,7 +236,10 @@ void helperrorString(int state){
 void checkEOF(){
 
     if (insertSemicolon == 1){
-        if(hide == 0) printf("SEMICOLON\n");
+        if(hide == 0){ 
+            printf("SEMICOLON\n");
+            return SEMICOLON;
+            }
         insertSemicolon = 0;
     }
 }
@@ -276,22 +280,10 @@ void countLines(){
         columns=1;
 }
 
-int main(int argc, char *argv[])
-{   
-
-    if(argv[1] == NULL){
-        hide = 1;
-    }
-
-    yylex();
-    yyparse();
-
-    return 0;
-
-
+int yywrap() {
+    return 1;
 }
 
-int yywrap()
-{
-return 1;
+void yyerror (const char *s) { 
+     printf ("%s: %s\n", s, yytext);
 }

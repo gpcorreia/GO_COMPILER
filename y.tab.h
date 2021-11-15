@@ -49,8 +49,8 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PACKAGE = 258,
-    ID = 259,
+    ERROR = 258,
+    PACKAGE = 259,
     SEMICOLON = 260,
     VAR = 261,
     LPAR = 262,
@@ -69,33 +69,36 @@ extern int yydebug;
     FOR = 275,
     RETURN = 276,
     PRINT = 277,
-    STRLIT = 278,
-    BLANKID = 279,
-    PARSEINT = 280,
-    CMDARGS = 281,
-    LSQ = 282,
-    RSQ = 283,
-    INTLIT = 284,
-    REALLIT = 285,
-    OR = 286,
-    AND = 287,
-    LT = 288,
-    GT = 289,
-    EQ = 290,
-    NE = 291,
-    LE = 292,
-    GE = 293,
-    PLUS = 294,
-    MINUS = 295,
-    STAR = 296,
-    DIV = 297,
-    MOD = 298,
-    NOT = 299
+    BLANKID = 278,
+    PARSEINT = 279,
+    CMDARGS = 280,
+    LSQ = 281,
+    RSQ = 282,
+    OR = 283,
+    AND = 284,
+    LT = 285,
+    GT = 286,
+    EQ = 287,
+    NE = 288,
+    LE = 289,
+    GE = 290,
+    PLUS = 291,
+    MINUS = 292,
+    STAR = 293,
+    DIV = 294,
+    MOD = 295,
+    NOT = 296,
+    RESERVED = 297,
+    STRLIT = 298,
+    INTLIT = 299,
+    ID = 300,
+    REALLIT = 301,
+    UNARY = 302
   };
 #endif
 /* Tokens.  */
-#define PACKAGE 258
-#define ID 259
+#define ERROR 258
+#define PACKAGE 259
 #define SEMICOLON 260
 #define VAR 261
 #define LPAR 262
@@ -114,28 +117,31 @@ extern int yydebug;
 #define FOR 275
 #define RETURN 276
 #define PRINT 277
-#define STRLIT 278
-#define BLANKID 279
-#define PARSEINT 280
-#define CMDARGS 281
-#define LSQ 282
-#define RSQ 283
-#define INTLIT 284
-#define REALLIT 285
-#define OR 286
-#define AND 287
-#define LT 288
-#define GT 289
-#define EQ 290
-#define NE 291
-#define LE 292
-#define GE 293
-#define PLUS 294
-#define MINUS 295
-#define STAR 296
-#define DIV 297
-#define MOD 298
-#define NOT 299
+#define BLANKID 278
+#define PARSEINT 279
+#define CMDARGS 280
+#define LSQ 281
+#define RSQ 282
+#define OR 283
+#define AND 284
+#define LT 285
+#define GT 286
+#define EQ 287
+#define NE 288
+#define LE 289
+#define GE 290
+#define PLUS 291
+#define MINUS 292
+#define STAR 293
+#define DIV 294
+#define MOD 295
+#define NOT 296
+#define RESERVED 297
+#define STRLIT 298
+#define INTLIT 299
+#define ID 300
+#define REALLIT 301
+#define UNARY 302
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -143,9 +149,11 @@ union YYSTYPE
 {
 #line 12 "gocompiler.y"
 
-    char * value;
+    char * type;
+	char * string;
+	struct node * node;
 
-#line 149 "y.tab.h"
+#line 157 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

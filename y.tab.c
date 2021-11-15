@@ -68,16 +68,15 @@
 /* First part of user prologue.  */
 #line 1 "gocompiler.y"
 
-    #include <stdio.h>
-    #include <stdlib.h>
+
+    #include "gocompiler.h"
     #include "gocompiler.c"
-    
     int yylex(void);
     void yyerror (const char *s);
     void checkdivision();
     int check = 0;
 
-#line 81 "y.tab.c"
+#line 80 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -125,8 +124,8 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PACKAGE = 258,
-    ID = 259,
+    ERROR = 258,
+    PACKAGE = 259,
     SEMICOLON = 260,
     VAR = 261,
     LPAR = 262,
@@ -145,33 +144,36 @@ extern int yydebug;
     FOR = 275,
     RETURN = 276,
     PRINT = 277,
-    STRLIT = 278,
-    BLANKID = 279,
-    PARSEINT = 280,
-    CMDARGS = 281,
-    LSQ = 282,
-    RSQ = 283,
-    INTLIT = 284,
-    REALLIT = 285,
-    OR = 286,
-    AND = 287,
-    LT = 288,
-    GT = 289,
-    EQ = 290,
-    NE = 291,
-    LE = 292,
-    GE = 293,
-    PLUS = 294,
-    MINUS = 295,
-    STAR = 296,
-    DIV = 297,
-    MOD = 298,
-    NOT = 299
+    BLANKID = 278,
+    PARSEINT = 279,
+    CMDARGS = 280,
+    LSQ = 281,
+    RSQ = 282,
+    OR = 283,
+    AND = 284,
+    LT = 285,
+    GT = 286,
+    EQ = 287,
+    NE = 288,
+    LE = 289,
+    GE = 290,
+    PLUS = 291,
+    MINUS = 292,
+    STAR = 293,
+    DIV = 294,
+    MOD = 295,
+    NOT = 296,
+    RESERVED = 297,
+    STRLIT = 298,
+    INTLIT = 299,
+    ID = 300,
+    REALLIT = 301,
+    UNARY = 302
   };
 #endif
 /* Tokens.  */
-#define PACKAGE 258
-#define ID 259
+#define ERROR 258
+#define PACKAGE 259
 #define SEMICOLON 260
 #define VAR 261
 #define LPAR 262
@@ -190,28 +192,31 @@ extern int yydebug;
 #define FOR 275
 #define RETURN 276
 #define PRINT 277
-#define STRLIT 278
-#define BLANKID 279
-#define PARSEINT 280
-#define CMDARGS 281
-#define LSQ 282
-#define RSQ 283
-#define INTLIT 284
-#define REALLIT 285
-#define OR 286
-#define AND 287
-#define LT 288
-#define GT 289
-#define EQ 290
-#define NE 291
-#define LE 292
-#define GE 293
-#define PLUS 294
-#define MINUS 295
-#define STAR 296
-#define DIV 297
-#define MOD 298
-#define NOT 299
+#define BLANKID 278
+#define PARSEINT 279
+#define CMDARGS 280
+#define LSQ 281
+#define RSQ 282
+#define OR 283
+#define AND 284
+#define LT 285
+#define GT 286
+#define EQ 287
+#define NE 288
+#define LE 289
+#define GE 290
+#define PLUS 291
+#define MINUS 292
+#define STAR 293
+#define DIV 294
+#define MOD 295
+#define NOT 296
+#define RESERVED 297
+#define STRLIT 298
+#define INTLIT 299
+#define ID 300
+#define REALLIT 301
+#define UNARY 302
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -219,9 +224,11 @@ union YYSTYPE
 {
 #line 12 "gocompiler.y"
 
-    char * value;
+    char * type;
+	char * string;
+	struct node * node;
 
-#line 225 "y.tab.c"
+#line 232 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -540,10 +547,10 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   4
+#define YYLAST   3
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  45
+#define YYNTOKENS  48
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  2
 /* YYNRULES -- Number of rules.  */
@@ -552,7 +559,7 @@ union yyalloc
 #define YYNSTATES  6
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   299
+#define YYMAXUTOK   302
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -593,14 +600,15 @@ static const yytype_int8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    24,    24
+       0,    37,    37
 };
 #endif
 
@@ -609,12 +617,13 @@ static const yytype_int8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "PACKAGE", "ID", "SEMICOLON", "VAR",
+  "$end", "error", "$undefined", "ERROR", "PACKAGE", "SEMICOLON", "VAR",
   "LPAR", "RPAR", "COMMA", "INT", "FLOAT32", "BOOL", "STRING", "FUNC",
   "LBRACE", "RBRACE", "ASSIGN", "ELSE", "IF", "FOR", "RETURN", "PRINT",
-  "STRLIT", "BLANKID", "PARSEINT", "CMDARGS", "LSQ", "RSQ", "INTLIT",
-  "REALLIT", "OR", "AND", "LT", "GT", "EQ", "NE", "LE", "GE", "PLUS",
-  "MINUS", "STAR", "DIV", "MOD", "NOT", "$accept", "Program", YY_NULLPTR
+  "BLANKID", "PARSEINT", "CMDARGS", "LSQ", "RSQ", "OR", "AND", "LT", "GT",
+  "EQ", "NE", "LE", "GE", "PLUS", "MINUS", "STAR", "DIV", "MOD", "NOT",
+  "RESERVED", "STRLIT", "INTLIT", "ID", "REALLIT", "UNARY", "$accept",
+  "Program", YY_NULLPTR
 };
 #endif
 
@@ -627,11 +636,11 @@ static const yytype_int16 yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299
+     295,   296,   297,   298,   299,   300,   301,   302
 };
 # endif
 
-#define YYPACT_NINF (-4)
+#define YYPACT_NINF (-45)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -645,7 +654,7 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -2,     1,    -1,    -4,    -4
+      -4,   -44,     2,    -2,   -45,   -45
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -659,7 +668,7 @@ static const yytype_int8 yydefact[] =
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4
+     -45,   -45
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -673,25 +682,25 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     4,     3,     0,     5
+       1,     3,     4,     5
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     0,     4,    -1,     5
+       4,    45,     0,     5
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    46,     4,     0,     5
+       0,     4,    49,    45,     0,     5
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    45,    46
+       0,    48,    49
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -1393,13 +1402,13 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 24 "gocompiler.y"
-                              {printf("1º rule\n");}
-#line 1399 "y.tab.c"
+#line 37 "gocompiler.y"
+                               {addNode("Program",(yyvsp[-1].string)); showList();}
+#line 1408 "y.tab.c"
     break;
 
 
-#line 1403 "y.tab.c"
+#line 1412 "y.tab.c"
 
       default: break;
     }
@@ -1631,6 +1640,18 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 134 "gocompiler.y"
+#line 147 "gocompiler.y"
+
+int main(int argc, char *argv[])
+{   
+
+    // if(argv[1] == NULL){
+    //     hide = 1;
+    // }
+
+    yyparse();
+
+    return 0;
 
 
+}
