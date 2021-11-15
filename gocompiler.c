@@ -22,7 +22,6 @@ void showList()
         while (proximo != NULL)
         {
             printf("No: %s\n", proximo->token);
-            printf("No: %s\n", proximo->value);
             proximo = proximo->next;
         }
     }

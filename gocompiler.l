@@ -1,5 +1,6 @@
 %{  
-    #include "y.tab.h"
+    #include "y.tab.h>"
+    
     #define MAX_STRING 100 
     void countColumns();
     void countLines();
