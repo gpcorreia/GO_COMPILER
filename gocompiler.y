@@ -5,6 +5,7 @@
     int yylex(void);
     void yyerror (const char *s);
     void checkdivision();
+    extern char * yytext;
     int check = 0;
 %}
 
@@ -34,24 +35,24 @@
 
 %%
 
-Program: PACKAGE ID SEMICOLON Declarations {addNode("Program",""); showList();}
+Program: PACKAGE Id SEMICOLON Declarations {addNode("Program",""); showList();}
         ;
 
-Declarations:
+Declarations:   {$$ = NULL;}
                | VarDeclaration SEMICOLON Declarations
-               | FuncDeclaration SEMICOLON Declarations
+               | FuncDeclaration SEMICOLON Declarations {$$ = $1;}
                ;
 
 VarDeclaration: VAR VarSpec
               | VAR LPAR VarSpec SEMICOLON RPAR
               ;
 
-VarSpec: ID AuxVarSpec Type
+VarSpec: Id AuxVarSpec Type
         |
         ;
 
 
-AuxVarSpec: COMMA ID AuxVarSpec
+AuxVarSpec: COMMA Id AuxVarSpec
           |
           ;
 
@@ -62,39 +63,38 @@ Type: INT
     | STRING
     ;
 
-FuncDeclaration:  FUNC ID LPAR Parameters RPAR Type FuncBody
-               |  FUNC ID LPAR RPAR Type FuncBody
-               |  FUNC ID LPAR Parameters RPAR FuncBody  
-               |  FUNC ID LPAR RPAR FuncBody
+FuncDeclaration:  FUNC Id LPAR Parameters RPAR Type FuncBody  {$$ = createFuncDecl($2,$4,$6,$7);}
+               |  FUNC Id LPAR RPAR Type FuncBody    {$$ = createFuncDecl($2,NULL,$5,$6);} 
+               |  FUNC Id LPAR Parameters RPAR FuncBody {$$ = createFuncDecl($2,$4,NULL,$6);}   
+               |  FUNC Id LPAR RPAR FuncBody  {$$ = createFuncDecl($2,NULL,NULL,$5);} 
                ;
 
 
-Parameters: ID Type AuxParameters
-          |
+Parameters: Id Type AuxParameters   {if($$ == NULL){addNode("ParamDecl",$1,NULL);} else{ $$ = addNode("ParamDecl",$1,$2);}}
           ;
 
-AuxParameters: COMMA ID Type AuxParameters
-             |
+AuxParameters: COMMA Id Type AuxParameters
+             |  {$$ = NULL;}
              ;
 
-FuncBody: LBRACE VarsAndStatements RBRACE
+FuncBody: LBRACE VarsAndStatements RBRACE { $$ = addchild(createNode("FuncBody",NULL),$2,NULL);}
         ;
 
 
-VarsAndStatements: VarsAndStatements VarDeclaration SEMICOLON
-                 | VarsAndStatements Statement SEMICOLON
-                 | VarsAndStatements SEMICOLON
-                 |
+VarsAndStatements: VarsAndStatements VarDeclaration SEMICOLON {$$ = addbro($1,$2);}
+                 | VarsAndStatements Statement SEMICOLON {$$ = addbro($1,$2);}
+                 | VarsAndStatements SEMICOLON {$$ = $1;}
+                 | {$$ = NULL;}
                  ;
 
-Statement: ID ASSIGN Expr
+Statement: Id ASSIGN Expr
          | LBRACE AuxStatement RBRACE
-         | IF Expr LBRACE AuxStatement RBRACE
+         | IF Expr LBRACE AuxStatement RBRACE 
          | IF Expr LBRACE AuxStatement RBRACE ELSE LBRACE AuxStatement RBRACE
          | FOR Expr LBRACE AuxStatement RBRACE
          | FOR LBRACE AuxStatement RBRACE 
-         | RETURN
-         | RETURN Expr
+         | RETURN   {$$ = createNode("Return",NULL);}
+         | RETURN Expr {$$ = addchild(createNode("Return",NULL),$2,NULL);}
          | FuncInvocation
          | ParseArgs
          | PRINT LPAR Expr RPAR
@@ -106,10 +106,10 @@ AuxStatement: Statement SEMICOLON AuxStatement
             |
             ;
 
-ParseArgs: ID COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR
+ParseArgs: Id COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR
          ;
 
-FuncInvocation: ID LPAR AuxFuncInvocation RPAR
+FuncInvocation: Id LPAR AuxFuncInvocation RPAR
               ;
 
 
@@ -118,33 +118,40 @@ AuxFuncInvocation: Expr
                  ;
 
 
-Expr: Expr OR Expr
-    | Expr AND Expr
-    | Expr LT Expr
-    | Expr GT Expr
-    | Expr EQ Expr
-    | Expr NE Expr
-    | Expr LE Expr
-    | Expr GE Expr
-    | Expr PLUS Expr
-    | Expr MINUS Expr
-    | Expr STAR Expr
-    | Expr DIV Expr
-    | Expr MOD Expr
-    | NOT Expr
-    | MINUS Expr
-    | PLUS Expr
-    | Expr MOD Expr
-    | INTLIT
-    | REALLIT
-    | ID
+Expr: Expr OR Expr { $$ = addchild(createNode("OR",NULL),$1,$2); }
+    | Expr AND Expr { $$ = addchild(createNode("AND",NULL),$1,$2); }
+    | Expr LT Expr { $$ = addchild(createNode("LT",NULL),$1,$2); }
+    | Expr GT Expr { $$ = addchild(createNode("GT",NULL),$1,$2); }
+    | Expr EQ Expr { $$ = addchild(createNode("EQ",NULL),$1,$2); }
+    | Expr NE Expr { $$ = addchild(createNode("NE",NULL),$1,$2); }
+    | Expr LE Expr { $$ = addchild(createNode("LE",NULL),$1,$2); }
+    | Expr GE Expr { $$ = addchild(createNode("GE",NULL),$1,$2); }
+    | Expr PLUS Expr { $$ = addchild(createNode("PLUS",NULL),$1,$2); }
+    | Expr MINUS Expr { $$ = addchild(createNode("MINUS",NULL),$1,$2); }
+    | Expr STAR Expr { $$ = addchild(createNode("STAR",NULL),$1,$2); }
+    | Expr DIV Expr { $$ = addchild(createNode("DIV",NULL),$1,$2); }
+    | Expr MOD Expr { $$ = addchild(createNode("MOD",NULL),$1,$2); }
+    | NOT Expr { $$ = addchild(createNode("NOT",NULL),$2,NULL); } 
+    | MINUS Expr { $$ = addchild(createNode("MINUS",NULL),$2,NULL); }
+    | PLUS Expr { $$ = addchild(createNode("PLUS",NULL),$2,NULL); }
+    | INTLIT { $$ = createNode("IntLit",$1); }
+    | REALLIT { $$ = createNode("RealLit",$1); }
+    | Id {$$ = $1;}
     | FuncInvocation
     | LPAR Expr RPAR
     ;
 
+Id: ID  {$$ = createNode("Id",$1);}
+   ; 
 
 
 %%
+
+
+void yyerror (const char *s) { 
+     printf ("%s: %s\n", s, yytext);
+}
+
 int main(int argc, char *argv[])
 {   
 

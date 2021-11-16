@@ -1,5 +1,5 @@
 %{  
-    #include "y.tab.h>"
+    #include "y.tab.h"
     
     #define MAX_STRING 100 
     void countColumns();
@@ -285,6 +285,3 @@ int yywrap() {
     return 1;
 }
 
-void yyerror (const char *s) { 
-     printf ("%s: %s\n", s, yytext);
-}

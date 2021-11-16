@@ -1,1 +1,5 @@
 package main;
+
+func factorial(n int) int {
+    int x = 0;
+}
