@@ -1,19 +1,17 @@
 %{
-    #include "gocompiler.c"
     #include "gocompiler.h"
+    // #include "gocompiler.c"
     int yylex(void);
     void yyerror (const char *s);
     void checkdivision();
     void showList(Tree * head,int point2print);
     extern char * yytext;
     extern int hide;
-    extern int columns;
-    extern int lines;
     int check = 0;
     int needsBlock = 0;
     Tree * my_tree = NULL;
-    int syntatic_errors = 0;
     int yydebug = 0;
+    int syntatic_errors = 0;
 %}
 
 
@@ -28,9 +26,12 @@
 %token <string> STRLIT RESERVED INTLIT ID REALLIT
 
 
+
 %type <node> Program Declarations VarDeclaration VarSpec AuxVarSpec Type Expr
 %type <node> FuncDeclaration Parameters AuxParameters FuncBody VarsAndStatements Statement
-%type <node> AuxStatement ParseArgs FuncInvocation AuxFuncInvocation Id
+%type <node> AuxStatement ParseArgs FuncInvocation CallParams AuxCallParams Id
+
+
 
 %left COMMA
 %right ASSIGN
@@ -45,11 +46,11 @@
 
 %%
 
-Program: PACKAGE Id SEMICOLON Declarations { $$ = my_tree = addchild(createNode("Program",NULL),$4,NULL);}
+Program: PACKAGE Id SEMICOLON Declarations { my_tree = add1child(createNode("Program",NULL),$4);}
         ;
 
-Declarations:    Declarations VarDeclaration SEMICOLON {$$ = addbro($1,$2);}
-               | Declarations FuncDeclaration SEMICOLON { $$ = addbro($1,$2);}
+Declarations:    VarDeclaration SEMICOLON Declarations {$$ = addbro($1,$3);}
+               | FuncDeclaration SEMICOLON Declarations { $$ = addbro($1,$3);}
                | {$$ = NULL;}
                ;
 
@@ -57,12 +58,12 @@ VarDeclaration: VAR VarSpec {$$ = $2;}
               | VAR LPAR VarSpec SEMICOLON RPAR {$$ = $3;}
               ;
 
-VarSpec: Id AuxVarSpec Type {$$ = createListId(addbro($1,$2),$3,1); }
-        | { $$ == NULL;}
+VarSpec: Id AuxVarSpec Type {$$ = createListId($1,$2,$3); }
+        | { $$ = NULL;}
         ;
 
 
-AuxVarSpec: COMMA Id AuxVarSpec { $$ = addbro($3,$2);}
+AuxVarSpec: COMMA Id AuxVarSpec { $$ = addbro($2,$3);}
           | {$$ = NULL;}
           ;
 
@@ -87,33 +88,33 @@ AuxParameters: COMMA Id Type AuxParameters { $$ = addbro(addchild(createNode("Pa
              |  {$$ = NULL;}
              ;
 
-FuncBody: LBRACE VarsAndStatements RBRACE { $$ = addchild(createNode("FuncBody",NULL),$2,NULL);}
+FuncBody: LBRACE VarsAndStatements RBRACE { $$ = add1child(createNode("FuncBody",NULL),$2);}
         ;
 
 
 VarsAndStatements: VarsAndStatements VarDeclaration SEMICOLON {$$ = addbro($1,$2);}
-                 | VarsAndStatements Statement SEMICOLON {$$ = addbro($1,$2);}
+                 | VarsAndStatements Statement SEMICOLON { $$ = addbro($1,$2);  }
                  | VarsAndStatements SEMICOLON {$$ = $1;}
                  | {$$ = NULL;}
                  ;
 
 Statement: Id ASSIGN Expr   {$$ = addchild(createNode("Assign",NULL),$1,$3);}
-         | LBRACE AuxStatement RBRACE { $$ = $2;}
+         | LBRACE AuxStatement RBRACE { if($2 != NULL && $2->next != NULL) $$ = add1child(createNode("Block",NULL),$2); else $$ = $2;}
          | IF Expr LBRACE AuxStatement RBRACE {$$ = cicleIf($2,$4,NULL);}
          | IF Expr LBRACE AuxStatement RBRACE ELSE LBRACE AuxStatement RBRACE { $$ = cicleIf($2,$4,$8);}
          | FOR Expr LBRACE AuxStatement RBRACE { $$ = cicleFor($2,$4);}
          | FOR LBRACE AuxStatement RBRACE { $$ = cicleFor(NULL,$3);}
          | RETURN   {$$ = createNode("Return",NULL);}
-         | RETURN Expr {$$ = addchild(createNode("Return",NULL),$2,NULL);}
-         | FuncInvocation {$$ = $1;}
+         | RETURN Expr { $$ = add1child(createNode("Return",NULL),$2);}
+         | FuncInvocation {$$ = add1child(createNode("Call",NULL),$1);}
          | ParseArgs {$$ = $1;}
-         | PRINT LPAR Expr RPAR {$$ = addchild(createNode("Print",NULL),$3,NULL);}
-         | PRINT LPAR STRLIT RPAR { $$ = addchild(createNode("Print",NULL),createNode("Strlit",$3),NULL);}
+         | PRINT LPAR Expr RPAR { $$ = add1child(createNode("Print",NULL),$3);}
+         | PRINT LPAR STRLIT RPAR { $$ = add1child(createNode("Print",NULL),createNode("StrLit",$3));}
          | error { $$ = NULL; syntatic_errors = 1;}
          ;
 
 
-AuxStatement: AuxStatement Statement SEMICOLON{ $$ = addbro($1,$2);}
+AuxStatement: Statement SEMICOLON AuxStatement {$$ = addbro($1,$3);}
             | {$$ = NULL;}
             ;
 
@@ -121,14 +122,17 @@ ParseArgs: Id COMMA BLANKID ASSIGN PARSEINT LPAR CMDARGS LSQ Expr RSQ RPAR { $$ 
           | Id COMMA BLANKID ASSIGN PARSEINT LPAR error RPAR {$$ = NULL; syntatic_errors = 1;}
          ;
 
-FuncInvocation: Id LPAR AuxFuncInvocation RPAR { $$ = addbro(createListId($1,NULL,0),$3);}
+FuncInvocation: Id LPAR CallParams RPAR { $$ = addbro($1,$3);}
               | Id LPAR error RPAR {$$ = NULL; syntatic_errors = 1;}
               ;
 
+CallParams: Expr AuxCallParams {$$ = addbro($1,$2);}
+          | {$$ = NULL;}
+          ; 
 
-AuxFuncInvocation: Expr { $$ = $1;}
-                 | COMMA Expr { $$ = $2;}
-                 ;
+AuxCallParams: COMMA Expr AuxCallParams { $$ = addbro($2,$3);}
+             | {$$ = NULL;}
+             ;
 
 
 Expr: Expr OR Expr { $$ = addchild(createNode("Or",NULL),$1,$3);}
@@ -139,20 +143,20 @@ Expr: Expr OR Expr { $$ = addchild(createNode("Or",NULL),$1,$3);}
     | Expr NE Expr { $$ = addchild(createNode("Ne",NULL),$1,$3);}
     | Expr LE Expr { $$ = addchild(createNode("Le",NULL),$1,$3);}
     | Expr GE Expr { $$ = addchild(createNode("Ge",NULL),$1,$3);}
-    | Expr PLUS Expr { $$ = addchild(createNode("Plus",NULL),$1,$3);}
-    | Expr MINUS Expr { $$ = addchild(createNode("Minus",NULL),$1,$3);}
-    | Expr STAR Expr { $$ = addchild(createNode("Star",NULL),$1,$3);}
+    | Expr PLUS Expr { $$ = addchild(createNode("Add",NULL),$1,$3);}
+    | Expr MINUS Expr { $$ = addchild(createNode("Sub",NULL),$1,$3);}
+    | Expr STAR Expr { $$ = addchild(createNode("Mul",NULL),$1,$3);}
     | Expr DIV Expr { $$ = addchild(createNode("Div",NULL),$1,$3);}
     | Expr MOD Expr { $$ = addchild(createNode("Mod",NULL),$1,$3);}
-    | NOT Expr{ $$ = addchild(createNode("Not",NULL),$2,NULL);} 
-    | MINUS Expr { $$ = addchild(createNode("Minus",NULL),$2,NULL);}
-    | PLUS Expr { $$ = addchild(createNode("Plus",NULL),$2,NULL);}
+    | NOT Expr %prec UNARY{ $$ = addchild(createNode("Not",NULL),$2,NULL);} 
+    | MINUS Expr %prec UNARY { $$ = addchild(createNode("Minus",NULL),$2,NULL);}
+    | PLUS Expr %prec UNARY { $$ = addchild(createNode("Plus",NULL),$2,NULL);}
     | INTLIT { $$ = createNode("IntLit",$1);}
     | REALLIT { $$ = createNode("RealLit",$1);}
     | Id { $$ = $1;}
-    | FuncInvocation {$$ = $1;}
+    | FuncInvocation { $$ = add1child(createNode("Call",NULL),$1);}
     | LPAR error RPAR { $$ = NULL; syntatic_errors = 1;}
-    | LPAR Expr RPAR {printf("b\n"); $$ = $2;}
+    | LPAR Expr RPAR { $$ = $2;}
     ;
 
 Id: ID  { $$ = createNode("Id",$1);}
@@ -161,36 +165,6 @@ Id: ID  { $$ = createNode("Id",$1);}
 
 
 %%
-
-
-
-void showList(Tree * head,int point2print)
-{   
-
-    if (head == NULL)
-    {
-        return;
-    }
-    
-    for(int i = 0;i<point2print; i++){
-        printf(".");
-    }
-
-    if(!head->value){
-        printf("%s\n",head->token);
-    }
-    else{
-        printf("%s(%s)\n",head->token,head->value);
-    }
-
-    if(head->child){
-        showList(head->child,point2print+2);
-    }
-    if(head->next){
-        showList(head->next,point2print);
-    }
-    
-}
 
 
 
@@ -206,7 +180,7 @@ int main(int argc, char *argv[])
 			yyparse();
 
             if(!syntatic_errors){
-                showList(my_tree,0);
+                 showList(my_tree,0);
             }
         }
     }
