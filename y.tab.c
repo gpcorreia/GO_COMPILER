@@ -1573,7 +1573,7 @@ yyreduce:
 
   case 8:
 #line 61 "gocompiler.y"
-                            {(yyval.node) = createListId((yyvsp[-2].node),(yyvsp[-1].node),(yyvsp[0].node)); }
+                            {if((yyvsp[-1].node)!= NULL) (yyval.node) = createListId(addbro((yyvsp[-2].node),(yyvsp[-1].node)),(yyvsp[0].node)); else (yyval.node) = addchild(createNode("VarDecl",NULL),(yyvsp[0].node),(yyvsp[-2].node)); }
 #line 1578 "y.tab.c"
     break;
 

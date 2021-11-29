@@ -28,19 +28,6 @@ Tree *addchild(Tree *parent, Tree *value1, Tree *value2)
     return parent;
 }
 
-Tree *add3child(Tree *parent, Tree *value1, Tree *value2, Tree *value3)
-{
-    parent->child = value1;
-    value1->child = value2;
-
-    if (value2 != NULL)
-    {
-        value2->next = value3;
-    }
-
-    return parent;
-}
-
 Tree *addbro(Tree *head, Tree *bro)
 {
 
@@ -69,77 +56,61 @@ Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody)
     return addchild(createNode("FuncDecl", NULL), funcHeader, funcBody);
 }
 
-Tree *createListId(Tree *id, Tree *listIds, Tree *type)
+Tree *createListId(Tree *listIds, Tree *type)
 {
-    Tree *varDecl = createNode("VarDecl", NULL);
-    add1child(varDecl, type);
-    add1child(varDecl, id);
+			if (listIds != NULL) {
+				Tree * varDecl = listIds;
+                Tree * aux;
+				Tree * varDecls[100];
+				int i=0;
+				int k=0;
+                
+                Tree * auxtype;
 
-    if (listIds != NULL)
-    {
-        Tree *newId = listIds;
-        Tree *varDecls[100];
-        Tree *ids[100];
-        int i = 0;
-        int k = 0;
+				while(varDecl != NULL){
+					varDecls[k] = createNode("VarDecl", NULL);
+                    auxtype = createNode(type->token,NULL);
+					addchild(varDecls[k],auxtype,varDecl);
+                    k++;
+					i++;
+                    varDecl = varDecl->next;
+                }
 
-        //puts all Ids inside array
-        while (newId != NULL)
-        {
-            ids[k] = newId;
-            newId = newId->next;
-            k++;
-        }
+                Tree * varDecl2 = listIds; 
+                
+				if (varDecl2->next != NULL) {
+					while(varDecl2 != NULL) {
+						aux = varDecl2->next;
+						varDecl2->next = NULL;
+						varDecl2 = aux;
+					}
+				}
 
-        newId = listIds;
-        Tree *aux;
-
-        //destroys bro connections between Ids
-        if (newId->next != NULL)
-        {
-            while (newId != NULL)
-            {
-                aux = newId->next;
-                newId->next = NULL;
-                newId = aux;
-            }
-        }
-
-        Tree *auxType;
-
-        //creates a new VarDecl node for each Id received from the IdOpt
-        for (int n = 0; n < k; n++)
-        { //iterates ids array
-            varDecls[n] = createNode("VarDecl", NULL);
-            auxType = createNode(type->token, NULL);
-            add1child(varDecls[n], auxType);
-            add1child(varDecls[n], ids[n]);
-            i++;
-        }
-
-        if (i >= 1)
-            addbro(varDecl, varDecls[0]);
-
-        for (int j = 0; j + 1 < i; j++)
-        {
-            addbro(varDecls[j], varDecls[j + 1]);
-        }
-    }
-
-    return varDecl;
+				
+            varDecl = varDecls[0];
+				
+				for (int j=0; j+1<i; j++) {
+					addbro(varDecls[j], varDecls[j+1]);
+				}
+	        
+            return varDecl;	
+	}
 }
 
 Tree *cicleIf(Tree *condicions, Tree *content, Tree *contentElse)
 {
     Tree *auxIf = NULL;
+    Tree *auxIfCondicions = NULL;
     if (!contentElse)
     {
-        auxIf = addbro(addchild(createNode("Block", NULL), content, NULL), createNode("Block", NULL));
+        auxIf = addbro(add1child(createNode("Block", NULL), content), createNode("Block", NULL));
         return addchild(createNode("If", NULL), condicions, auxIf);
     }
     else
     {
-        return add3child(createNode("If", NULL), condicions, add1child(createNode("Block", NULL), content), add1child(createNode("Block", NULL), contentElse));
+        auxIf = addbro(add1child(createNode("Block", NULL), content), add1child(createNode("Block", NULL), contentElse));
+        auxIfCondicions = addbro(condicions, auxIf);
+        return add1child(createNode("If", NULL), auxIfCondicions);
     }
 }
 

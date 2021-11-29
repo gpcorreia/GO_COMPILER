@@ -21,12 +21,10 @@ Tree *addchild(Tree *parent, Tree *value1, Tree *value2);
 Tree *addbro(Tree *head, Tree *bro);
 Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody);
 Tree *cicleIf(Tree *condicions, Tree *content, Tree *contentElse);
-Tree *createListId(Tree *id, Tree *listIds, Tree *type);
+Tree *createListId(Tree *listIds, Tree *type);
 Tree *cicleFor(Tree *condicions, Tree *content);
 Tree *returnNode(Tree *node);
 Tree *strNode(Tree *str);
-
-Tree *add3child(Tree *parent, Tree *value1, Tree *value2, Tree *value3);
 Tree *add1child(Tree *parent, Tree *value1);
 void showList(Tree *root, int depth);
 

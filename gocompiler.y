@@ -1,6 +1,6 @@
 %{
     #include "gocompiler.h"
-    // #include "gocompiler.c"
+    #include "gocompiler.c"
     int yylex(void);
     void yyerror (const char *s);
     void checkdivision();
@@ -58,7 +58,7 @@ VarDeclaration: VAR VarSpec {$$ = $2;}
               | VAR LPAR VarSpec SEMICOLON RPAR {$$ = $3;}
               ;
 
-VarSpec: Id AuxVarSpec Type {$$ = createListId($1,$2,$3); }
+VarSpec: Id AuxVarSpec Type {if($2!= NULL) $$ = createListId(addbro($1,$2),$3); else $$ = addchild(createNode("VarDecl",NULL),$3,$1); }
         | { $$ = NULL;}
         ;
 

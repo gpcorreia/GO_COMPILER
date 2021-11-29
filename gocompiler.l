@@ -28,6 +28,8 @@
     extern int syntatic_errors;
 %}
 
+
+
 letra               [a-zA-Z_] 
 decimal             [0-9]+
 octal               [0-7]+
@@ -143,7 +145,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
 {ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
 {whitespace}                        { countColumns();}
-{newline}                           {  if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; if(hide != 0){countLines(); return SEMICOLON;} } columns = 1; countLines();}
+{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; if(hide != 0){ return SEMICOLON;} countLines(); } else{countLines();}}
 {comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 
@@ -155,10 +157,10 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT>{newline}             { countLines(); }
 <STARTCOMMENT>{endcomment}          { countColumns(); isComment = 0;BEGIN 0; }
 
-<STRLIT1>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} insertSemicolon=1; checkmarks=0;  BEGIN 0; yylval.string=(char*)strdup(final); if(hide != 0){columns = saveColumns; yytext = final; strCheck = 1; clearString(); return STRLIT;} columns+=strlen(yylval.string);  clearString();  }
+<STRLIT1>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} insertSemicolon=1; checkmarks=0;  BEGIN 0; yylval.string=(char*)strdup(final); yytext = final; if(hide != 0){columns = saveColumns; strCheck = 1; return STRLIT;} columns+=strlen(yylval.string);  clearString();}
 <STRLIT1>{whitespace}                {strcat(final,yytext);countColumns();}
 <STRLIT1>{newline}                   {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
-<STRLIT1><<EOF>>                     {helperrorString(0); checkmarks= 0;BEGIN 0 ; }
+<STRLIT1><<EOF>>                     {helperrorString(0); checkmarks= 0;clearString(); BEGIN 0 ; }
 <STRLIT1>{invalidescape}             {helperrorString(1);  countColumns(); BEGIN INVALIDSTRLIT; }
 <STRLIT1>{strlit}			         {strcat(final,yytext); countColumns();}
 <STRLIT1>.                           {countColumns();}
@@ -169,18 +171,20 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <INVALIDSTRLIT>{whitespace}         {strcat(final,yytext);countColumns();}
 <INVALIDSTRLIT>{invalidescape}      {helperrorString(1); countColumns(); BEGIN INVALIDSTRLIT;}
 <INVALIDSTRLIT>{newline}            {helperrorString(0); countLines() ; clearString(); checkmarks= 0; BEGIN 0 ; }
-<INVALIDSTRLIT><<EOF>>              {helperrorString(0); checkmarks= 0; BEGIN 0 ; }
+<INVALIDSTRLIT><<EOF>>              {helperrorString(0); checkmarks= 0; clearString(); BEGIN 0 ; }
 <INVALIDSTRLIT>{strlit}			    {countColumns();clearString();}
 <INVALIDSTRLIT>.                    {countColumns();}
 
 
-<<EOF>>                             {if (insertSemicolon == 1){
+<<EOF>>                             {
+                                        if (insertSemicolon == 1){
                                         if(hide == 0){ 
                                             printf("SEMICOLON\n");
                                         }
                                         insertSemicolon = 0;
                                         return SEMICOLON;
-                                        } return 0;}
+                                        } return 0;
+}
             
 .                                   { helperrorstate(0); }
 
@@ -217,11 +221,15 @@ void helperrorstate(int state){
 
 }
 
+
+
 void helperrorIntegerLiterals(){
         if(hide == 0 || hide == 1) printf("Line %d, column %d: invalid octal constant (%s)\n",lines,columns,yytext);
         countColumns();
     
 }
+
+
 
 void helperrorString(int state){
 
@@ -253,6 +261,7 @@ void clearString(){
 }
 
 
+
 void countColumns(){
     if(yyleng == 1){
         columns++;
@@ -263,10 +272,13 @@ void countColumns(){
 }
 
 
+
 void countLines(){
         lines++;
         columns=1;
 }
+
+
 
 void yyerror (const char *s) { 
      syntatic_errors = 1;
