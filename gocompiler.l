@@ -139,13 +139,13 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {func}                              {helpoutput("FUNC\n",0); countColumns(); if(hide != 0) return FUNC;  }
 {osArgs}                            {helpoutput("CMDARGS\n",0); countColumns(); if(hide != 0) return CMDARGS;  }
 {octalinvalidestring}               {helperrorIntegerLiterals();}
-{marks}                             {saveMarks = columns; checkmarks=1 ; saveColumns=columns; countColumns(); BEGIN STRLIT1 ; }
+{marks}                             {saveMarks = columns; checkmarks=1 ; saveColumns=columns; countColumns(); clearString(); BEGIN STRLIT1 ; }
 {intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return INTLIT;}
 {reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return REALLIT; }
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
 {ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
 {whitespace}                        { countColumns();}
-{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; if(hide != 0){ return SEMICOLON;} countLines(); } else{countLines();}}
+{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;}}  countLines();}
 {comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 
@@ -176,15 +176,19 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <INVALIDSTRLIT>.                    {countColumns();}
 
 
-<<EOF>>                             {
+<<EOF>>                             { 
                                         if (insertSemicolon == 1){
-                                        if(hide == 0){ 
-                                            printf("SEMICOLON\n");
-                                        }
+                                            if(hide == 0){ 
+                                                printf("SEMICOLON\n");
+                                            }
                                         insertSemicolon = 0;
-                                        return SEMICOLON;
-                                        } return 0;
-}
+                                        if(hide!=0) return SEMICOLON;
+                                        }
+                                        else{
+                                             countLines();
+                                        }
+                                        return 0;
+                                    }
             
 .                                   { helperrorstate(0); }
 

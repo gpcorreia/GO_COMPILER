@@ -1193,7 +1193,7 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 #line 142 "gocompiler.l"
-{saveMarks = columns; checkmarks=1 ; saveColumns=columns; countColumns(); BEGIN STRLIT1 ; }
+{saveMarks = columns; checkmarks=1 ; saveColumns=columns; countColumns(); clearString(); BEGIN STRLIT1 ; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
@@ -1224,7 +1224,7 @@ case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
 #line 148 "gocompiler.l"
-{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; if(hide != 0){ return SEMICOLON;} countLines(); } else{countLines();}}
+{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;}}  countLines();}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
@@ -1339,27 +1339,31 @@ case YY_STATE_EOF(INCOMMENT):
 case YY_STATE_EOF(NEWLINE):
 case YY_STATE_EOF(RETURN1):
 #line 179 "gocompiler.l"
-{
+{ 
                                         if (insertSemicolon == 1){
-                                        if(hide == 0){ 
-                                            printf("SEMICOLON\n");
-                                        }
+                                            if(hide == 0){ 
+                                                printf("SEMICOLON\n");
+                                            }
                                         insertSemicolon = 0;
-                                        return SEMICOLON;
-                                        } return 0;
-}
+                                        if(hide!=0) return SEMICOLON;
+                                        }
+                                        else{
+                                             countLines();
+                                        }
+                                        return 0;
+                                    }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 189 "gocompiler.l"
+#line 193 "gocompiler.l"
 { helperrorstate(0); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 193 "gocompiler.l"
+#line 197 "gocompiler.l"
 ECHO;
 	YY_BREAK
-#line 1363 "lex.yy.c"
+#line 1367 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2362,7 +2366,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 193 "gocompiler.l"
+#line 197 "gocompiler.l"
 
 void helpoutput(char * string,int state){
 
