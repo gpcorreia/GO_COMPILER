@@ -9,6 +9,7 @@
     extern int hide;
     int check = 0;
     int needsBlock = 0;
+
     Tree * my_tree = NULL;
     int yydebug = 0;
     int syntatic_errors = 0;

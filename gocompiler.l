@@ -145,7 +145,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
 {ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
 {whitespace}                        { countColumns();}
-{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;}}  countLines();}
+{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;} }  countLines();}
 {comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 

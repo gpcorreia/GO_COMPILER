@@ -1224,7 +1224,7 @@ case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
 #line 148 "gocompiler.l"
-{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;}}  countLines();}
+{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;} }  countLines();}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP

@@ -145,7 +145,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 18 "gocompiler.y"
+#line 19 "gocompiler.y"
 
 	char * string;
 	struct tree * node;

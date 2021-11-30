@@ -95,6 +95,7 @@ Tree *createListId(Tree *listIds, Tree *type)
 	        
             return varDecl;	
 	}
+    return NULL;
 }
 
 Tree *cicleIf(Tree *condicions, Tree *content, Tree *contentElse)
