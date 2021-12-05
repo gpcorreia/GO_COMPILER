@@ -1,0 +1,404 @@
+===== Global Symbol Table =====
+func__	(int,float32)	none
+func1	(int,int,float32,float32)	float32
+func2	(string)	int
+func3	(bool)	int
+func4	(int,float32,bool)	float32
+main	()	none
+
+===== Function func__(int,float32) Symbol Table =====
+return		none
+a		int	param
+b		float32	param
+
+===== Function func1(int,int,float32,float32) Symbol Table =====
+return		float32
+a		int	param
+b		int	param
+c		float32	param
+d		float32	param
+integer		int
+
+===== Function func2(string) Symbol Table =====
+return		int
+a		string	param
+
+===== Function func3(bool) Symbol Table =====
+return		int
+a		bool	param
+
+===== Function func4(int,float32,bool) Symbol Table =====
+return		float32
+a		int	param
+b		float32	param
+c		bool	param
+
+===== Function main() Symbol Table =====
+return		none
+a		int
+b		int
+c		int
+d		float32
+e		float32
+f		float32
+g		string
+h		string
+i		string
+j		bool
+k		bool
+l		bool
+toBe		bool
+
+Program
+..FuncDecl
+....FuncHeader
+......Id(func__)
+......FuncParams
+........ParamDecl
+..........Int
+..........Id(a)
+........ParamDecl
+..........Float32
+..........Id(b)
+....FuncBody
+......Return
+........IntLit(1)
+..FuncDecl
+....FuncHeader
+......Id(func1)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Id(a)
+........ParamDecl
+..........Int
+..........Id(b)
+........ParamDecl
+..........Float32
+..........Id(c)
+........ParamDecl
+..........Float32
+..........Id(d)
+....FuncBody
+......VarDecl
+........Int
+........Id(integer)
+......Return
+........Id(integer)
+..FuncDecl
+....FuncHeader
+......Id(func2)
+......Int
+......FuncParams
+........ParamDecl
+..........String
+..........Id(a)
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(func3)
+......Int
+......FuncParams
+........ParamDecl
+..........Bool
+..........Id(a)
+....FuncBody
+......Return
+........IntLit(1)
+..FuncDecl
+....FuncHeader
+......Id(func4)
+......Float32
+......FuncParams
+........ParamDecl
+..........Int
+..........Id(a)
+........ParamDecl
+..........Float32
+..........Id(b)
+........ParamDecl
+..........Bool
+..........Id(c)
+....FuncBody
+......VarDecl
+........Float32
+........Id(a)
+......Return
+........Id(a)
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Id(a)
+......VarDecl
+........Int
+........Id(b)
+......VarDecl
+........Int
+........Id(c)
+......VarDecl
+........Float32
+........Id(d)
+......VarDecl
+........Float32
+........Id(e)
+......VarDecl
+........Float32
+........Id(f)
+......VarDecl
+........String
+........Id(g)
+......VarDecl
+........String
+........Id(h)
+......VarDecl
+........String
+........Id(i)
+......VarDecl
+........Bool
+........Id(j)
+......VarDecl
+........Bool
+........Id(k)
+......VarDecl
+........Bool
+........Id(l)
+......VarDecl
+........Bool
+........Id(toBe)
+......Call
+........Id(f0)
+........Id(a)
+........Id(b)
+........Id(c)
+........Id(d)
+......Assign
+........Id(d)
+........Add
+..........Call
+............Id(func1)
+............Id(a)
+............Id(b)
+............Id(d)
+............Id(e)
+..........Call
+............Id(f0)
+............Id(a)
+............IntLit(1)
+............Id(d)
+............RealLit(1.0)
+......Assign
+........Id(a)
+........Call
+..........Id(func2)
+..........IntLit(1)
+..........IntLit(1)
+..........RealLit(1.0)
+..........RealLit(1.0)
+......ParseArgs
+........Id(a)
+........Call
+..........Id(func1)
+..........Id(a)
+..........IntLit(123)
+..........RealLit(.1e1)
+..........Id(f)
+......Assign
+........Id(a)
+........Id(func2)
+......Assign
+........Id(f)
+........Call
+..........Id(func1)
+..........Call
+............Id(func2)
+............Id(g)
+..........Add
+............Add
+..............Id(a)
+..............Id(b)
+............Id(c)
+..........Call
+............Id(func1)
+............Id(a)
+............Id(b)
+............Id(d)
+............Id(e)
+..........Add
+............Add
+..............Id(c)
+..............Id(e)
+............Id(f)
+......Print
+........Call
+..........Id(func1)
+..........Call
+............Id(func2)
+............Id(g)
+..........Add
+............Add
+..............Id(a)
+..............Id(b)
+............Id(c)
+..........Call
+............Id(func1)
+............Id(a)
+............Id(b)
+............Id(d)
+............Id(e)
+..........Add
+............Add
+..............Id(d)
+..............Id(e)
+............Id(f)
+......ParseArgs
+........Id(a)
+........Call
+..........Id(func1)
+..........Ge
+............Id(a)
+............Id(b)
+......Assign
+........Id(f)
+........RealLit(1.1)
+......Assign
+........Id(a)
+........RealLit(1.0)
+......Call
+........Id(func3)
+........Gt
+..........Id(j)
+..........Id(k)
+......Call
+........Id(func3)
+........Eq
+..........Id(l)
+..........Id(j)
+......Print
+........Or
+..........Id(j)
+..........And
+............Id(k)
+............Id(l)
+......Call
+........Id(func3)
+........Gt
+..........Id(a)
+..........Id(f)
+......ParseArgs
+........Id(f)
+........Id(i)
+......Call
+........Id(func3)
+........Ge
+..........Id(a)
+..........Id(c)
+......Assign
+........Id(a)
+........Eq
+..........IntLit(12)
+..........IntLit(32)
+......Print
+........StrLit("((What a mess)) ")
+......Assign
+........Id(j)
+........Eq
+..........IntLit(12)
+..........IntLit(32)
+......For
+........Block
+..........Call
+............Id(func3)
+............And
+..............Id(f)
+..............Id(l)
+..........Assign
+............Id(a)
+............Add
+..............Id(b)
+..............Id(c)
+..........For
+............Eq
+..............Id(a)
+..............Id(c)
+............Block
+..............Call
+................Id(func3)
+................Or
+..................Id(j)
+..................Not
+....................Id(l)
+..............Assign
+................Id(d)
+................Add
+..................Id(e)
+..................Id(f)
+..............Assign
+................Id(a)
+................Call
+..................Id(func3)
+..............For
+................Ge
+..................Id(j)
+..................Id(l)
+................Block
+..................ParseArgs
+....................Id(a)
+....................Call
+......................Id(func3)
+......................Ge
+........................Id(a)
+........................Id(b)
+..................For
+....................Id(f)
+....................Block
+......................If
+........................Id(l)
+........................Block
+..........................Assign
+............................Id(d)
+............................Id(f)
+........................Block
+..........................Assign
+............................Id(a)
+............................Id(a)
+..................For
+....................Or
+......................Id(toBe)
+......................Not
+........................Id(toBe)
+....................Block
+......................If
+........................Id(toBe)
+........................Block
+........................Block
+..........................If
+............................Not
+..............................Id(toBe)
+............................Block
+..............................Print
+................................Call
+..................................Id(func_)
+..................................Id(a)
+..................................Id(c)
+..................................Id(e)
+............................Block
+..............................Assign
+................................Id(toBe)
+................................Not
+..................................Id(toBe)
+..............Assign
+................Id(noWhereToBeFound)
+................Call
+..................Id(noWhereToBeFound)
+..................Eq
+....................Id(a)
+....................Id(b)
+..................Id(c)
+..................Ge
+....................Id(d)
+....................Id(f)

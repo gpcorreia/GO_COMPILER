@@ -1,0 +1,144 @@
+===== Global Symbol Table =====
+a		float32
+i		int
+f	()	none
+main	()	none
+undef	()	none
+types	()	none
+g	()	none
+h	(bool)	int
+
+===== Function f() Symbol Table =====
+return		none
+
+===== Function main() Symbol Table =====
+return		none
+x		int
+y		int
+b		bool
+
+===== Function undef() Symbol Table =====
+return		none
+
+===== Function types() Symbol Table =====
+return		none
+x		float32
+n		int
+
+===== Function g() Symbol Table =====
+return		none
+
+===== Function h(bool) Symbol Table =====
+return		int
+q		bool	param
+
+Program
+..VarDecl
+....Float32
+....Id(a)
+..VarDecl
+....Int
+....Id(i)
+..VarDecl
+....Bool
+....Id(i)
+..FuncDecl
+....FuncHeader
+......Id(f)
+......FuncParams
+....FuncBody
+......Call
+........Id(g)
+......Call
+........Id(h)
+..FuncDecl
+....FuncHeader
+......Id(f)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Id(x)
+......VarDecl
+........Int
+........Id(y)
+......VarDecl
+........Bool
+........Id(b)
+......Assign
+........Id(b)
+........And
+..........IntLit(1)
+..........IntLit(1)
+......Assign
+........Id(i)
+........Add
+..........Id(i)
+..........IntLit(007)
+......Call
+........Id(h)
+......Call
+........Id(h)
+........Not
+..........Id(i)
+......Assign
+........Id(x)
+........RealLit(1.0)
+......For
+........Id(x)
+........Block
+..........If
+............Id(x)
+............Block
+..............Call
+................Id(h)
+................Add
+..................Id(a)
+..................Id(x)
+..............Return
+............Block
+..FuncDecl
+....FuncHeader
+......Id(undef)
+......FuncParams
+....FuncBody
+......For
+........Lt
+..........IntLit(1)
+..........Id(undeclared)
+........Block
+..FuncDecl
+....FuncHeader
+......Id(types)
+......FuncParams
+....FuncBody
+......VarDecl
+........Float32
+........Id(x)
+......VarDecl
+........Int
+........Id(n)
+......Assign
+........Id(x)
+........Add
+..........Id(n)
+..........Id(x)
+..FuncDecl
+....FuncHeader
+......Id(g)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(h)
+......Int
+......FuncParams
+........ParamDecl
+..........Bool
+..........Id(q)
+....FuncBody

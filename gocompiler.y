@@ -1,6 +1,10 @@
 %{
     #include "gocompiler.h"
+    #include "semantics.h"
+    #include "symbols_table.h"
     #include "gocompiler.c"
+    #include "semantics.c"
+    #include "symbols_table.c"
     int yylex(void);
     void yyerror (const char *s);
     void checkdivision();
@@ -11,20 +15,23 @@
     int needsBlock = 0;
 
     Tree * my_tree = NULL;
+    table_elem * my_symbols_table = NULL;
     int yydebug = 0;
     int syntatic_errors = 0;
+    extern int lexical_errors;
 %}
 
 
 %union {
-	char * string;
+	struct Token token;
 	struct tree * node;
 }
 
 
-%token error PACKAGE SEMICOLON VAR LPAR RPAR COMMA INT FLOAT32 BOOL STRING FUNC LBRACE RBRACE ASSIGN ELSE IF FOR RETURN PRINT BLANKID PARSEINT CMDARGS LSQ RSQ OR AND
-%token LT GT EQ NE LE GE PLUS MINUS STAR DIV MOD NOT
-%token <string> STRLIT RESERVED INTLIT ID REALLIT
+%token <token> PACKAGE SEMICOLON VAR LPAR RPAR COMMA INT FLOAT32 BOOL STRING FUNC LBRACE RBRACE ASSIGN ELSE IF FOR RETURN PRINT BLANKID PARSEINT CMDARGS LSQ RSQ OR AND
+%token <token> LT GT EQ NE LE GE PLUS MINUS STAR DIV MOD NOT
+%token <token> STRLIT RESERVED INTLIT ID REALLIT
+%token error
 
 
 
@@ -110,7 +117,7 @@ Statement: Id ASSIGN Expr   {$$ = addchild(createNode("Assign",NULL),$1,$3);}
          | FuncInvocation {$$ = add1child(createNode("Call",NULL),$1);}
          | ParseArgs {$$ = $1;}
          | PRINT LPAR Expr RPAR { $$ = add1child(createNode("Print",NULL),$3);}
-         | PRINT LPAR STRLIT RPAR { $$ = add1child(createNode("Print",NULL),createNode("StrLit",$3));}
+         | PRINT LPAR STRLIT RPAR { $$ = add1child(createNode("Print",NULL),createNode("StrLit",$3.token));}
          | error { $$ = NULL; syntatic_errors = 1;}
          ;
 
@@ -152,15 +159,15 @@ Expr: Expr OR Expr { $$ = addchild(createNode("Or",NULL),$1,$3);}
     | NOT Expr %prec UNARY{ $$ = addchild(createNode("Not",NULL),$2,NULL);} 
     | MINUS Expr %prec UNARY { $$ = addchild(createNode("Minus",NULL),$2,NULL);}
     | PLUS Expr %prec UNARY { $$ = addchild(createNode("Plus",NULL),$2,NULL);}
-    | INTLIT { $$ = createNode("IntLit",$1);}
-    | REALLIT { $$ = createNode("RealLit",$1);}
+    | INTLIT { $$ = createNode("IntLit",$1.token);}
+    | REALLIT { $$ = createNode("RealLit",$1.token);}
     | Id { $$ = $1;}
     | FuncInvocation { $$ = add1child(createNode("Call",NULL),$1);}
     | LPAR error RPAR { $$ = NULL; syntatic_errors = 1;}
     | LPAR Expr RPAR { $$ = $2;}
     ;
 
-Id: ID  { $$ = createNode("Id",$1);}
+Id: ID  { $$ = createNode("Id",$1.token);}
    ; 
 
 
@@ -176,7 +183,7 @@ int main(int argc, char *argv[])
             hide = 0;
 			yylex();
         }
-        if (strcmp(argv[1], "-t") == 0) {
+        else if (strcmp(argv[1], "-t") == 0) {
             hide = 1;
 			yyparse();
 
@@ -184,11 +191,18 @@ int main(int argc, char *argv[])
                  showList(my_tree,0);
             }
         }
+        else if(strcmp(argv[1], "-s") == 0){
+            hide = 1;
+            yyparse();
+            my_symbols_table = check_root(my_tree);
+            print_tabel(my_symbols_table);
+            printf("\n");
+            if(!syntatic_errors){
+                 showList(my_tree,0);
+            }
+        }
     }
-    else{
-        hide = 1;
-        yyparse();
-    }
+
 
     return 0;
 }

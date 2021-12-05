@@ -1,0 +1,123 @@
+===== Global Symbol Table =====
+globalVar_int		int
+globalVar_float32		float32
+globalVar_int	()	int
+function_2	()	none
+main	()	none
+function_1	()	none
+globalVar_string		string
+global_var_bool		bool
+
+===== Function globalVar_int() Symbol Table =====
+return		int
+_globalVar_int		int
+_globalVar_string		string
+globalVar_float32		bool
+_globalVar_bool		bool
+
+===== Function function_2() Symbol Table =====
+return		none
+
+===== Function main() Symbol Table =====
+return		none
+main_string		string
+
+===== Function function_1() Symbol Table =====
+return		none
+localVar_1		float32
+
+Program
+..VarDecl
+....Int
+....Id(globalVar_int)
+..VarDecl
+....Float32
+....Id(globalVar_float32)
+..FuncDecl
+....FuncHeader
+......Id(globalVar_int)
+......Int
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Id(_globalVar_int)
+......VarDecl
+........String
+........Id(_globalVar_string)
+......VarDecl
+........Bool
+........Id(globalVar_float32)
+......VarDecl
+........Bool
+........Id(_globalVar_bool)
+......Assign
+........Id(globalVar_float32)
+........Id(_globalVar_string)
+......Return
+........Id(_globalVar_int)
+..FuncDecl
+....FuncHeader
+......Id(function_2)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........String
+........Id(main_string)
+......Call
+........Id(function_1)
+........IntLit(12)
+........IntLit(13)
+......Call
+........Id(function_1)
+......Call
+........Id(function_2)
+......Call
+........Id(function_2)
+........IntLit(123)
+........Id(main_string)
+..FuncDecl
+....FuncHeader
+......Id(function_1)
+......FuncParams
+....FuncBody
+......VarDecl
+........Float32
+........Id(localVar_1)
+......Assign
+........Id(localVar_1)
+........Id(globalVar_int)
+..FuncDecl
+....FuncHeader
+......Id(function_1)
+......FuncParams
+........ParamDecl
+..........Int
+..........Id(a)
+........ParamDecl
+..........Int
+..........Id(b)
+....FuncBody
+......VarDecl
+........Int
+........Id(localVar_1)
+......VarDecl
+........Float32
+........Id(localVar_2)
+......Assign
+........Id(localVar_1)
+........Id(globalVar_float32)
+......Assign
+........Id(localVar_2)
+........Id(globalVar_int)
+..VarDecl
+....String
+....Id(globalVar_string)
+..VarDecl
+....Bool
+....Id(global_var_bool)

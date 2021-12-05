@@ -8,6 +8,13 @@
 #define MAX_STRING 100
 #define MAX_VALUE 100
 
+typedef struct Token
+{
+    char *token;
+    int line;
+    int column;
+} TOKEN;
+
 typedef struct tree
 {
     char *token;

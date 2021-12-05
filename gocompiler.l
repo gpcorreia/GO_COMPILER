@@ -1,6 +1,7 @@
 %{  
-    #include "y.tab.h"
     #include "gocompiler.h"
+    // #include "symbols_table.h"
+    #include "y.tab.h"
     
     #define MAX_STRING 100 
     void countColumns();
@@ -18,14 +19,16 @@
     int isComment = 0;
     int saveMarks = 0;
     int saveComm = 0;
-    int saveColumns = 0;
-    int saveLines = 0;
+    int saveColumns = 1;
+    int saveLines = 1;
     int hide = 0;
     int checkmarks = 0;
     int newline = 0;
     int strCheck = 0;
     char final[MAX_STRING] = "";
     extern int syntatic_errors;
+    int lexical_errors = 0;
+    // table_element *symtab=NULL;
 %}
 
 
@@ -140,12 +143,12 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {osArgs}                            {helpoutput("CMDARGS\n",0); countColumns(); if(hide != 0) return CMDARGS;  }
 {octalinvalidestring}               {helperrorIntegerLiterals();}
 {marks}                             {saveMarks = columns; checkmarks=1 ; saveColumns=columns; countColumns(); clearString(); BEGIN STRLIT1 ; }
-{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return INTLIT;}
-{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return REALLIT; }
-{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
-{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.string=(char*)strdup(yytext); insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
+{intlit}                            {if(hide == 0) {printf("INTLIT(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon = 1; countColumns(); if(hide != 0) return INTLIT;}
+{reallit}                           {if(hide == 0) {printf("REALLIT(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon = 1; countColumns(); if(hide != 0) return REALLIT; }
+{reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
+{ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
 {whitespace}                        { countColumns();}
-{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; countColumns(); if(hide != 0){ return SEMICOLON;} }  countLines();}
+{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; yylval.token.line = lines; yylval.token.column = columns; countLines(); if(hide != 0){ return SEMICOLON;} }  else countLines();}
 {comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 
@@ -157,7 +160,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <STARTCOMMENT>{newline}             { countLines(); }
 <STARTCOMMENT>{endcomment}          { countColumns(); isComment = 0;BEGIN 0; }
 
-<STRLIT1>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} insertSemicolon=1; checkmarks=0;  BEGIN 0; yylval.string=(char*)strdup(final); yytext = final; if(hide != 0){columns = saveColumns; strCheck = 1; return STRLIT;} columns+=strlen(yylval.string);  clearString();}
+<STRLIT1>{marks}                     {if(hide == 0) {printf("STRLIT(\"%s\")\n",final);} insertSemicolon=1; checkmarks=0;  BEGIN 0; yylval.token.token=(char*)strdup(final); yytext = final; yylval.token.line = lines; yylval.token.column = columns-strlen(yytext)-1; countColumns();  if(hide != 0){ strCheck = 1; return STRLIT;}}
 <STRLIT1>{whitespace}                {strcat(final,yytext);countColumns();}
 <STRLIT1>{newline}                   {helperrorString(0); countLines() ; clearString(); BEGIN 0 ; }
 <STRLIT1><<EOF>>                     {helperrorString(0); checkmarks= 0;clearString(); BEGIN 0 ; }
@@ -176,16 +179,14 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 <INVALIDSTRLIT>.                    {countColumns();}
 
 
-<<EOF>>                             { 
+<<EOF>>                             { yylval.token.line = lines;
+                                        yylval.token.column = columns;
                                         if (insertSemicolon == 1){
                                             if(hide == 0){ 
                                                 printf("SEMICOLON\n");
                                             }
                                         insertSemicolon = 0;
                                         if(hide!=0) return SEMICOLON;
-                                        }
-                                        else{
-                                             countLines();
                                         }
                                         return 0;
                                     }
@@ -197,6 +198,8 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 %%
 void helpoutput(char * string,int state){
 
+    yylval.token.line = lines;
+    yylval.token.column = columns;
 
     if(hide == 0)
         printf("%s",string);
@@ -212,7 +215,7 @@ void helpoutput(char * string,int state){
 }
 
 void helperrorstate(int state){
-
+    lexical_errors = 1;
     if(state == 0){
         if(hide == 0 || hide == 1) printf("Line %d, column %d: illegal character (%s)\n",lines,columns,yytext);
         countColumns();
@@ -228,6 +231,8 @@ void helperrorstate(int state){
 
 
 void helperrorIntegerLiterals(){
+        lexical_errors = 1;
+
         if(hide == 0 || hide == 1) printf("Line %d, column %d: invalid octal constant (%s)\n",lines,columns,yytext);
         countColumns();
     
@@ -236,6 +241,8 @@ void helperrorIntegerLiterals(){
 
 
 void helperrorString(int state){
+        lexical_errors = 1;
+
 
     if(state == 0){
         if(hide == 0 || hide == 1) printf("Line %d, column %d: unterminated string literal\n",lines,saveMarks);
@@ -287,10 +294,10 @@ void countLines(){
 void yyerror (const char *s) { 
      syntatic_errors = 1;
      if(strCheck == 0){
-        printf ( "Line %d, column %d: %s: %s\n" ,lines,(int)(columns-strlen(yytext)),s, yytext);   
+        printf ( "Line %d, column %d: %s: %s\n" ,yylval.token.line,yylval.token.column,s, yytext);   
      }
      else{
-        printf ( "Line %d, column %d: %s: \"%s\"\n" ,lines,columns,s, yytext);
+        printf ( "Line %d, column %d: %s: \"%s\"\n" ,yylval.token.line,yylval.token.column,s, yytext);
         strCheck = 0;
      }
 }

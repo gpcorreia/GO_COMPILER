@@ -58,43 +58,47 @@ Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody)
 
 Tree *createListId(Tree *listIds, Tree *type)
 {
-			if (listIds != NULL) {
-				Tree * varDecl = listIds;
-                Tree * aux;
-				Tree * varDecls[100];
-				int i=0;
-				int k=0;
-                
-                Tree * auxtype;
+    if (listIds != NULL)
+    {
+        Tree *varDecl = listIds;
+        Tree *aux;
+        Tree *varDecls[100];
+        int i = 0;
+        int k = 0;
 
-				while(varDecl != NULL){
-					varDecls[k] = createNode("VarDecl", NULL);
-                    auxtype = createNode(type->token,NULL);
-					addchild(varDecls[k],auxtype,varDecl);
-                    k++;
-					i++;
-                    varDecl = varDecl->next;
-                }
+        Tree *auxtype;
 
-                Tree * varDecl2 = listIds; 
-                
-				if (varDecl2->next != NULL) {
-					while(varDecl2 != NULL) {
-						aux = varDecl2->next;
-						varDecl2->next = NULL;
-						varDecl2 = aux;
-					}
-				}
+        while (varDecl != NULL)
+        {
+            varDecls[k] = createNode("VarDecl", NULL);
+            auxtype = createNode(type->token, NULL);
+            addchild(varDecls[k], auxtype, varDecl);
+            k++;
+            i++;
+            varDecl = varDecl->next;
+        }
 
-				
-            varDecl = varDecls[0];
-				
-				for (int j=0; j+1<i; j++) {
-					addbro(varDecls[j], varDecls[j+1]);
-				}
-	        
-            return varDecl;	
-	}
+        Tree *varDecl2 = listIds;
+
+        if (varDecl2->next != NULL)
+        {
+            while (varDecl2 != NULL)
+            {
+                aux = varDecl2->next;
+                varDecl2->next = NULL;
+                varDecl2 = aux;
+            }
+        }
+
+        varDecl = varDecls[0];
+
+        for (int j = 0; j + 1 < i; j++)
+        {
+            addbro(varDecls[j], varDecls[j + 1]);
+        }
+
+        return varDecl;
+    }
     return NULL;
 }
 

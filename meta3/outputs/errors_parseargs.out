@@ -1,0 +1,118 @@
+===== Global Symbol Table =====
+ci		float32
+rad		float32
+area		float32
+PI		float32
+main	(bool)	none
+
+===== Function main(bool) Symbol Table =====
+return		none
+unused		bool	param
+i		int
+f		float32
+s		string
+b		bool
+
+Program
+..VarDecl
+....Float32
+....Id(ci)
+..VarDecl
+....Float32
+....Id(rad)
+..VarDecl
+....Float32
+....Id(area)
+..VarDecl
+....Float32
+....Id(PI)
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+........ParamDecl
+..........Bool
+..........Id(unused)
+....FuncBody
+......VarDecl
+........Int
+........Id(i)
+......VarDecl
+........Float32
+........Id(f)
+......VarDecl
+........String
+........Id(s)
+......VarDecl
+........Bool
+........Id(b)
+......ParseArgs
+........Id(f)
+........Id(f)
+......ParseArgs
+........Id(f)
+........Id(i)
+......ParseArgs
+........Id(i)
+........Id(f)
+......ParseArgs
+........Id(i)
+........Id(i)
+......Print
+........Id(f)
+......Print
+........Id(i)
+......Print
+........Id(s)
+......Print
+........Id(b)
+......Assign
+........Id(i)
+........Add
+..........Id(i)
+..........Id(f)
+......Assign
+........Id(i)
+........Add
+..........Id(f)
+..........Id(i)
+......Assign
+........Id(i)
+........Add
+..........Id(f)
+..........Id(f)
+......Assign
+........Id(i)
+........Add
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(b)
+........Add
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(b)
+........Gt
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(b)
+........Le
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(b)
+........Eq
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(b)
+........Ne
+..........Id(b)
+..........Id(b)
+......Assign
+........Id(i)
+........Add
+..........Id(s)
+..........Id(s)
