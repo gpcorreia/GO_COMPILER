@@ -106,7 +106,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {semicolon}                         {helpoutput("SEMICOLON\n",0); countColumns(); if(hide != 0) return SEMICOLON;}
 {comma}                             {helpoutput("COMMA\n",0); countColumns(); if(hide != 0) return COMMA;}
 {blankid}                           {helpoutput("BLANKID\n",0); countColumns(); if(hide != 0) return BLANKID;  }
-{assign}                            {helpoutput("ASSIGN\n",0); countColumns(); if(hide != 0) return ASSIGN;  }
+{assign}                            {helpoutput("ASSIGN\n",0);yylval.token.line = lines; yylval.token.column = columns; countColumns(); if(hide != 0) return ASSIGN;  }
 {star}                              {helpoutput("STAR\n",0); countColumns(); if(hide != 0) return STAR; }
 {div}                               {helpoutput("DIV\n",0); countColumns(); if(hide != 0) return DIV;  }
 {minus}                             {helpoutput("MINUS\n",0); countColumns(); if(hide != 0) return MINUS; }
@@ -148,7 +148,7 @@ reserved            break|default|interface|select|case|defer|go|map|struct|chan
 {reserved}                          {if(hide == 0) {printf("RESERVED(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon=0; countColumns(); if(hide != 0) return RESERVED;}
 {ids}                               {if(hide == 0) {printf("ID(%s)\n",yytext);} yylval.token.token=(char*)strdup(yytext); yylval.token.line = lines; yylval.token.column = columns; insertSemicolon = 1; countColumns(); if(hide != 0) return ID;}
 {whitespace}                        { countColumns();}
-{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; yylval.token.line = lines; yylval.token.column = columns; countLines(); if(hide != 0){ return SEMICOLON;} }  else countLines();}
+{newline}                           { if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} strCheck = 0; insertSemicolon = 0; yylval.token.line = lines; yylval.token.column = columns; countLines(); if(hide != 0){ return SEMICOLON;} }  else{strCheck=0; countLines();}}
 {comment}.*                         {;}
 {startcomment}                      {isComment = 1; saveComm=columns; saveLines=lines; countColumns(); BEGIN STARTCOMMENT ;}
 

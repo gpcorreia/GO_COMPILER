@@ -1,4 +1,5 @@
 lex gocompiler.l
 yacc -d gocompiler.y
-cc -o gocompiler y.tab.c lex.yy.c
-./gocompiler -s < meta3/inputs/variable_func_assign_errors.dgo
+cc -o gocompiler *.c
+./gocompiler -s < meta3/inputs/errors.dgo > meta3/isso/errors.out
+cat meta3/isso/errors.out

@@ -1016,7 +1016,7 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 109 "gocompiler.l"
-{helpoutput("ASSIGN\n",0); countColumns(); if(hide != 0) return ASSIGN;  }
+{helpoutput("ASSIGN\n",0);yylval.token.line = lines; yylval.token.column = columns; countColumns(); if(hide != 0) return ASSIGN;  }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
@@ -1227,7 +1227,7 @@ case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
 #line 151 "gocompiler.l"
-{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} insertSemicolon = 0; yylval.token.line = lines; yylval.token.column = columns; countLines(); if(hide != 0){ return SEMICOLON;} }  else countLines();}
+{ if(insertSemicolon == 1 && isComment == 0){ if(hide == 0){ printf("SEMICOLON\n");} strCheck = 0; insertSemicolon = 0; yylval.token.line = lines; yylval.token.column = columns; countLines(); if(hide != 0){ return SEMICOLON;} }  else{strCheck=0; countLines();}}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP

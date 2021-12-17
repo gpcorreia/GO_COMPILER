@@ -6,13 +6,13 @@
 #include <stdio.h>
 
 #include "gocompiler.h"
-#include "semantics.h"
 
 typedef struct varTab
 {
     char *value;
     char *type;
     int isParam;
+    int isUsed;
     struct varTab *next;
 } varDecl;
 
@@ -31,11 +31,21 @@ typedef struct elem
     struct elem *next;
 } table_elem;
 
+int semantic_errors;
+
 funcDecl *create_node_func(Tree *funcHeader_content);
 varDecl *create_node_var(Tree *varDecl_content);
 Tree *insert_Symbol_Table(funcDecl *functionl, varDecl *var);
-int check_exist_token(char *string);
+void anoted_tree(Tree *body);
+varDecl *check_id_simbols_table(char *value);
+funcDecl *check_func_simbols_table(char *value);
+varDecl *find_var_in_function(char *value);
+int check_params(Tree *call, funcDecl *func);
+int check_exist_token(char *string, int check);
 int check_var_exist(char *string, varDecl *lista_var);
 char *tolower_string(char *string);
+char *string_params_func(varDecl *vars_params);
+int handle_semantic_errors(int line, int column, char *symbol, char *value, char *value2);
+char *clear_string_to_error(char *string);
 
 #endif

@@ -1,0 +1,5 @@
+package main;
+func f() {
+  fmt.Println("teste")
+  0 = 1 // Erro aqui no 0
+}

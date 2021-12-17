@@ -1,0 +1,176 @@
+Line 10, column 5: Symbol i already defined
+Line 12, column 12: Cannot find symbol g()
+Line 12, column 14: Cannot find symbol (null)
+Line 12, column 17: Cannot find symbol h()
+Line 12, column 19: Cannot find symbol (null)
+Line 13, column 6: Symbol f already defined
+Line 18, column 15: Operator && cannot be applied to types int, int
+Line 18, column 15: Operator && cannot be applied to types int, int
+Line 20, column 5: Cannot find symbol h()
+Line 20, column 7: Cannot find symbol (null)
+Line 21, column 5: Cannot find symbol h()
+Line 21, column 9: Operator (null) cannot be applied to type int
+Line 21, column 9: Cannot find symbol (null)
+Line 22, column 12: Operator = cannot be applied to types int, float32
+Line 25, column 13: Cannot find symbol h()
+Line 25, column 18: Operator + cannot be applied to types float32, int
+Line 25, column 18: Cannot find symbol (null)
+Line 25, column 13: Cannot find symbol h()
+Line 25, column 18: Operator + cannot be applied to types float32, int
+Line 25, column 18: Cannot find symbol (null)
+Line 27, column 10: Incompatible type int in if statement
+Line 25, column 13: Cannot find symbol h()
+Line 25, column 18: Operator + cannot be applied to types float32, int
+Line 25, column 18: Cannot find symbol (null)
+Line 25, column 13: Cannot find symbol h()
+Line 25, column 18: Operator + cannot be applied to types float32, int
+Line 25, column 18: Cannot find symbol (null)
+Line 27, column 10: Incompatible type int in if statement
+Line 28, column 5: Incompatible type int in for statement
+Line 32, column 13: Cannot find symbol undeclared()
+Line 32, column 13: Cannot find symbol undeclared()
+Line 32, column 24: Operator < cannot be applied to types int, undef
+===== Global Symbol Table =====
+a		float32
+i		int
+f	()	none
+main	()	none
+undef	()	none
+types	()	none
+g	()	none
+h	(bool)	int
+
+===== Function f() Symbol Table =====
+return		none
+
+===== Function main() Symbol Table =====
+return		none
+x		int
+y		int
+b		bool
+
+===== Function undef() Symbol Table =====
+return		none
+
+===== Function types() Symbol Table =====
+return		none
+x		float32
+n		int
+
+===== Function g() Symbol Table =====
+return		none
+
+===== Function h(bool) Symbol Table =====
+return		int
+q		bool	param
+
+Program
+..VarDecl
+....Float32
+....Id(a)
+..VarDecl
+....Int
+....Id(i)
+..VarDecl
+....Bool
+....Id(i)
+..FuncDecl
+....FuncHeader
+......Id(f)
+......FuncParams
+....FuncBody
+......Call
+........Id(g)
+......Call
+........Id(h)
+..FuncDecl
+....FuncHeader
+......Id(f)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Id(x)
+......VarDecl
+........Int
+........Id(y)
+......VarDecl
+........Bool
+........Id(b)
+......Assign - bool
+........Id(b) - bool
+........And - bool
+..........IntLit(1) - int
+..........IntLit(1) - int
+......Assign - int
+........Id(i) - int
+........Add - int
+..........Id(i) - int
+..........IntLit(007) - int
+......Call
+........Id(h)
+......Call
+........Id(h)
+........Not - bool
+..........Id(i) - int
+......Assign
+........Id(x) - int
+........RealLit(1.0) - float32
+......For
+........Id(x) - int
+........Block
+..........If
+............Id(x) - int
+............Block
+..............Call
+................Id(h)
+................Add
+..................Id(a) - float32
+..................Id(x) - int
+..............Return
+............Block
+..FuncDecl
+....FuncHeader
+......Id(undef)
+......FuncParams
+....FuncBody
+......For
+........Lt - bool
+..........IntLit(1) - int
+..........Id(undeclared)
+........Block
+..FuncDecl
+....FuncHeader
+......Id(types)
+......FuncParams
+....FuncBody
+......VarDecl
+........Float32
+........Id(x)
+......VarDecl
+........Int
+........Id(n)
+......Assign - int
+........Id(x) - int
+........Add - int
+..........Id(n) - int
+..........Id(x) - int
+..FuncDecl
+....FuncHeader
+......Id(g)
+......FuncParams
+....FuncBody
+..FuncDecl
+....FuncHeader
+......Id(h)
+......Int
+......FuncParams
+........ParamDecl
+..........Bool
+..........Id(q)
+....FuncBody

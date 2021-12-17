@@ -1,12 +1,15 @@
 #include "gocompiler.h"
+#include "y.tab.h"
 
-Tree *createNode(char *token, char *value)
+Tree *createNode(char *token, char *value, char *print)
 {
     Tree *newnode = (Tree *)malloc(sizeof(Tree));
 
     newnode->token = token;
     newnode->value = value;
-
+    newnode->print = print;
+    newnode->line = yylval.token.line;
+    newnode->column = yylval.token.column;
     return newnode;
 }
 
@@ -50,10 +53,10 @@ Tree *addbro(Tree *head, Tree *bro)
 
 Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody)
 {
-    Tree *funcParams = add1child(createNode("FuncParams", NULL), params);
-    Tree *funcHeader = addchild(createNode("FuncHeader", NULL), id, addbro(type, funcParams));
+    Tree *funcParams = add1child(createNode("FuncParams", NULL, NULL), params);
+    Tree *funcHeader = addchild(createNode("FuncHeader", NULL, NULL), id, addbro(type, funcParams));
 
-    return addchild(createNode("FuncDecl", NULL), funcHeader, funcBody);
+    return addchild(createNode("FuncDecl", NULL, NULL), funcHeader, funcBody);
 }
 
 Tree *createListId(Tree *listIds, Tree *type)
@@ -70,8 +73,8 @@ Tree *createListId(Tree *listIds, Tree *type)
 
         while (varDecl != NULL)
         {
-            varDecls[k] = createNode("VarDecl", NULL);
-            auxtype = createNode(type->token, NULL);
+            varDecls[k] = createNode("VarDecl", NULL, NULL);
+            auxtype = createNode(type->token, NULL, NULL);
             addchild(varDecls[k], auxtype, varDecl);
             k++;
             i++;
@@ -108,14 +111,14 @@ Tree *cicleIf(Tree *condicions, Tree *content, Tree *contentElse)
     Tree *auxIfCondicions = NULL;
     if (!contentElse)
     {
-        auxIf = addbro(add1child(createNode("Block", NULL), content), createNode("Block", NULL));
-        return addchild(createNode("If", NULL), condicions, auxIf);
+        auxIf = addbro(add1child(createNode("Block", NULL, NULL), content), createNode("Block", NULL, NULL));
+        return addchild(createNode("If", NULL, NULL), condicions, auxIf);
     }
     else
     {
-        auxIf = addbro(add1child(createNode("Block", NULL), content), add1child(createNode("Block", NULL), contentElse));
+        auxIf = addbro(add1child(createNode("Block", NULL, NULL), content), add1child(createNode("Block", NULL, NULL), contentElse));
         auxIfCondicions = addbro(condicions, auxIf);
-        return add1child(createNode("If", NULL), auxIfCondicions);
+        return add1child(createNode("If", NULL, NULL), auxIfCondicions);
     }
 }
 
@@ -123,11 +126,11 @@ Tree *cicleFor(Tree *condicions, Tree *content)
 {
     if (!condicions)
     {
-        return add1child(createNode("For", NULL), add1child(createNode("Block", NULL), content));
+        return add1child(createNode("For", NULL, NULL), add1child(createNode("Block", NULL, NULL), content));
     }
     else
     {
-        return addchild(createNode("For", NULL), condicions, add1child(createNode("Block", NULL), content));
+        return addchild(createNode("For", NULL, NULL), condicions, add1child(createNode("Block", NULL, NULL), content));
     }
 }
 
@@ -146,7 +149,10 @@ void showList(Tree *head, int point2print)
 
     if (!head->value)
     {
-        printf("%s\n", head->token);
+        if (head->print)
+            printf("%s - %s\n", head->token, head->print);
+        else
+            printf("%s\n", head->token);
     }
     else
     {
@@ -156,7 +162,11 @@ void showList(Tree *head, int point2print)
         }
         else
         {
-            printf("%s(%s)\n", head->token, head->value);
+            if (head->print != NULL)
+                printf("%s(%s) - %s\n", head->token, head->value, head->print);
+
+            else
+                printf("%s(%s)\n", head->token, head->value);
         }
     }
 

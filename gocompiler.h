@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
 #define MAX_STRING 100
 #define MAX_VALUE 100
 
@@ -19,11 +20,14 @@ typedef struct tree
 {
     char *token;
     char *value;
+    char *print;
+    int line;
+    int column;
     struct tree *next;
     struct tree *child;
 } Tree;
 
-Tree *createNode(char *token, char *value);
+Tree *createNode(char *token, char *value, char *string);
 Tree *addchild(Tree *parent, Tree *value1, Tree *value2);
 Tree *addbro(Tree *head, Tree *bro);
 Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody);
