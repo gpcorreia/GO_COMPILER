@@ -1,0 +1,61 @@
+===== Global Symbol Table =====
+ola		int
+factorial	(int,int)	int
+main	()	none
+
+===== Function factorial(int,int) Symbol Table =====
+return		int
+n		int	param
+y		int	param
+
+===== Function main() Symbol Table =====
+return		none
+argument		int
+
+Program
+..VarDecl
+....Int
+....Id(ola)
+..FuncDecl
+....FuncHeader
+......Id(factorial)
+......Int
+......FuncParams
+........ParamDecl
+..........Int
+..........Id(n)
+........ParamDecl
+..........Int
+..........Id(y)
+....FuncBody
+......If
+........Eq - bool
+..........Id(n) - int
+..........IntLit(0) - int
+........Block
+..........Return
+............IntLit(1) - int
+........Block
+......Return
+........Mul - int
+..........Id(n) - int
+..........Call - int
+............Id(factorial) - (int,int)
+............Sub - int
+..............Id(n) - int
+..............IntLit(1) - int
+..FuncDecl
+....FuncHeader
+......Id(main)
+......FuncParams
+....FuncBody
+......VarDecl
+........Int
+........Id(argument)
+......ParseArgs - int
+........Id(argument) - int
+........IntLit(1) - int
+......Print
+........Call - int
+..........Id(factorial) - (int,int)
+..........Id(argument) - int

@@ -30,7 +30,12 @@ void prepare2anoted(Tree *func)
 
     if (strcmp(aux->next->token, "FuncBody") == 0)
     {
-        anoted_tree(aux->next->child);
+        aux = aux->next->child;
+        while (aux != NULL)
+        {
+            anoted_tree(aux);
+            aux = aux->next;
+        }
     }
 }
 

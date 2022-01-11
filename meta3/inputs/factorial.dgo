@@ -1,6 +1,9 @@
 package main;
 
-func factorial(n int) int {
+var ola int;
+
+
+func factorial(n int,y int) int {
     if n == 0 {
         return 1;
     };

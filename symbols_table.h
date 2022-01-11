@@ -6,13 +6,14 @@
 #include <stdio.h>
 
 #include "gocompiler.h"
-
+#define UNDEF "undef"
 typedef struct varTab
 {
     char *value;
     char *type;
     int isParam;
     int isUsed;
+    int line;
     struct varTab *next;
 } varDecl;
 
@@ -37,11 +38,12 @@ funcDecl *create_node_func(Tree *funcHeader_content);
 varDecl *create_node_var(Tree *varDecl_content);
 Tree *insert_Symbol_Table(funcDecl *functionl, varDecl *var);
 void anoted_tree(Tree *body);
-varDecl *check_id_simbols_table(char *value);
+varDecl *check_vars_global(char *value);
 funcDecl *check_func_simbols_table(char *value);
-varDecl *find_var_in_function(char *value);
+varDecl *find_var_in_function(Tree *head);
+char *prepare_to_print_error_params(Tree *node, int posicion);
 int check_params(Tree *call, funcDecl *func);
-int check_exist_token(char *string, int check);
+int check_exist_token(char *string);
 int check_var_exist(char *string, varDecl *lista_var);
 char *tolower_string(char *string);
 char *string_params_func(varDecl *vars_params);

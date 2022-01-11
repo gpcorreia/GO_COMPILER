@@ -1,0 +1,27 @@
+Line 15, column 34: Operator strconv.Atoi cannot be applied to types float32, float32
+Line 16, column 34: Operator strconv.Atoi cannot be applied to types float32, int
+Line 17, column 34: Operator strconv.Atoi cannot be applied to types int, float32
+Line 29, column 14: Operator + cannot be applied to types int, float32
+Line 29, column 14: Operator = cannot be applied to types int, undef
+Line 30, column 14: Operator + cannot be applied to types float32, int
+Line 30, column 14: Operator = cannot be applied to types int, undef
+Line 31, column 14: Operator = cannot be applied to types int, float32
+Line 32, column 14: Operator = cannot be applied to types int, bool
+Line 36, column 14: Operator > cannot be applied to types bool, bool
+Line 37, column 15: Operator <= cannot be applied to types bool, bool
+Line 43, column 14: Operator = cannot be applied to types int, string
+===== Global Symbol Table =====
+ci		float32
+rad		float32
+area		float32
+PI		float32
+main	(bool)	none
+
+===== Function main(bool) Symbol Table =====
+return		none
+unused		bool	param
+i		int
+f		float32
+s		string
+b		bool
+

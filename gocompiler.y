@@ -16,6 +16,7 @@
     int yydebug = 0;
     int syntatic_errors = 0;
     extern int lexical_errors;
+    extern int semantic_errors;
 %}
 
 
@@ -66,6 +67,7 @@ VarDeclaration: VAR VarSpec {$$ = $2;}
 VarSpec: Id AuxVarSpec Type {if($2!= NULL) $$ = createListId(addbro($1,$2),$3); else $$ = addchild(createNode("VarDecl",NULL,NULL),$3,$1); }
         | { $$ = NULL;}
         ;
+
 
 
 AuxVarSpec: COMMA Id AuxVarSpec { $$ = addbro($2,$3);}
@@ -192,17 +194,22 @@ int main(int argc, char *argv[])
             yyparse();
             my_symbols_table = check_root(my_tree);
             
+           if(!syntatic_errors && semantic_errors == 0){
             print_tabel(my_symbols_table);
-
-            if(!syntatic_errors){
                  showList(my_tree,0);
             }
         }
-        else{
+    }
+    else{
             hide = 1;
             yyparse();
-        }
+            my_symbols_table = check_root(my_tree);
+            
 
-    }
+            if(!syntatic_errors && semantic_errors == 0){
+            print_tabel(my_symbols_table);
+                 showList(my_tree,0);
+            }
+        }
     return 0;
 }

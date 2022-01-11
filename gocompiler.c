@@ -1,7 +1,7 @@
 #include "gocompiler.h"
 #include "y.tab.h"
 
-Tree *createNode(char *token, char *value, char *print)
+Tree *createNode(char *token, char *value, char *print) //,int line,int
 {
     Tree *newnode = (Tree *)malloc(sizeof(Tree));
 
@@ -112,6 +112,7 @@ Tree *cicleIf(Tree *condicions, Tree *content, Tree *contentElse)
     if (!contentElse)
     {
         auxIf = addbro(add1child(createNode("Block", NULL, NULL), content), createNode("Block", NULL, NULL));
+
         return addchild(createNode("If", NULL, NULL), condicions, auxIf);
     }
     else

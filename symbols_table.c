@@ -14,9 +14,10 @@ funcDecl *create_node_func(Tree *funcHeader_content)
     // varDecl *listVarDecl = (varDecl *)malloc(sizeof(varDecl)); // lista ligada de variaveis da funcao
     varDecl *lastList = NULL;
 
-    if (check_exist_token(aux->value, 0) == 1)
+    if (check_exist_token(aux->value) == 1)
     {
         printf("Line %d, column %d: Symbol %s already defined\n", aux->line, aux->column, aux->value);
+        semantic_errors = 1;
         return NULL;
     }
 
@@ -42,6 +43,7 @@ funcDecl *create_node_func(Tree *funcHeader_content)
         listVarDecl->type = tolower_string(aux->child->token);
         listVarDecl->isParam = 1;
         listVarDecl->isUsed = 0;
+        listVarDecl->line = aux->child->line;
         listVarDecl->next = NULL;
 
         if (newFuncNode->vars == NULL)
@@ -73,6 +75,8 @@ funcDecl *create_node_func(Tree *funcHeader_content)
                 listVarDecl->type = tolower_string(funcBodyContent->child->token);
                 listVarDecl->isParam = 0;
                 listVarDecl->isUsed = 0;
+                listVarDecl->line = funcBodyContent->child->line;
+
                 listVarDecl->next = NULL;
 
                 if (newFuncNode->vars == NULL)
@@ -101,16 +105,19 @@ varDecl *create_node_var(Tree *varDecl_content)
     Tree *aux = varDecl_content;
     varDecl *newNodeVar = (varDecl *)malloc(sizeof(varDecl));
 
-    if (check_exist_token(aux->next->value, 1) == 1)
+    if (check_exist_token(aux->next->value) == 1)
     {
         printf("Line %d, column %d: Symbol %s already defined\n", aux->next->line, aux->next->column, aux->next->value);
+        semantic_errors = 1;
         return NULL;
     }
     newNodeVar->value = aux->next->value;
     newNodeVar->type = tolower_string(aux->token);
     newNodeVar->isParam = 0;
     newNodeVar->isUsed = 0;
+    newNodeVar->line = aux->line;
     newNodeVar->next = NULL;
+
     return newNodeVar;
 }
 
@@ -169,41 +176,40 @@ void anoted_tree(Tree *body)
 
     else if (strcmp(body->token, "Id") == 0)
     {
-        varDecl *aux = check_id_simbols_table(body->value);
-        if (aux == NULL)
+        varDecl *aux_in_func = find_var_in_function(body);
+        if (aux_in_func == NULL)
         {
-            funcDecl *aux2 = check_func_simbols_table(body->value);
-            if (aux2 != NULL)
+            varDecl *aux_global = check_vars_global(body->value);
+
+            if (aux_global == NULL)
             {
-                char *newString = (char *)malloc(sizeof(char));
-                strcat(newString, "(");
-                if (string_params_func(aux2->vars) == NULL)
+                funcDecl *aux2 = check_func_simbols_table(body->value);
+                if (aux2 != NULL)
                 {
-                    strcat(newString, ")");
-                }
-                else
-                {
-                    strcat(newString, string_params_func(aux2->vars));
-                    strcat(newString, ")");
-                }
+                    char *newString = (char *)malloc(sizeof(char));
+                    strcat(newString, "(");
+                    if (string_params_func(aux2->vars) == NULL)
+                    {
+                        strcat(newString, ")");
+                    }
+                    else
+                    {
+                        strcat(newString, string_params_func(aux2->vars));
+                        strcat(newString, ")");
+                    }
 
-                body->print = newString;
+                    body->print = newString;
+                }
             }
-
             else
             {
-                // if(find_var_in_function(body->value) != NULL){
-
-                // }
-                if (body->print == NULL)
-                    printf("Line %d, column %d: Cannot find symbol %s()\n", body->line, body->column, body->value);
-                else
-                    printf("Line %d, column %d: Cannot find symbol %s%s\n", body->line, body->column, body->value, body->print);
+                body->print = aux_global->type;
             }
         }
         else
         {
-            body->print = aux->type;
+            // printf("%s------------\n", aux_in_func->value);
+            body->print = aux_in_func->type;
         }
     }
 
@@ -231,7 +237,6 @@ void anoted_tree(Tree *body)
 
     else if (strcmp(body->token, "And") == 0)
     {
-
         anoted_tree(body->child);
         anoted_tree(body->child->next);
 
@@ -337,21 +342,36 @@ void anoted_tree(Tree *body)
 
     else if (strcmp(body->token, "Call") == 0)
     {
-        anoted_tree(body->child);
+        if (body->next)
+        {
+            if (body->next->print == NULL)
+            {
+                anoted_tree(body->next);
+            }
+        }
 
         funcDecl *aux = check_func_simbols_table(body->child->value);
 
         if (aux == NULL)
         {
-            printf("Line %d, column %d: Cannot find symbol %s\n", body->line, body->column, body->value);
+            printf("Line %d, column %d: Cannot find symbol %s()\n", body->line, body->column, body->value);
+            semantic_errors = 1;
         }
         else
         {
-            body->print = aux->return_type;
-            // if (check_params(body->child, aux) != 0)
-            // {
-            //     printf("Line %d, column %d: Bad Params\n", body->line, body->column);
-            // }
+            anoted_tree(body->child);
+            int posicion = check_params(body, aux);
+
+            if (posicion == 0)
+            {
+                body->print = aux->return_type;
+            }
+            else
+            {
+                char *newString = prepare_to_print_error_params(body, posicion);
+                printf("Line %d, column %d: Cannot find symbol %s(%s)\n", body->line, body->column, body->child->value, newString);
+                semantic_errors = 1;
+            }
         }
     }
 
@@ -359,12 +379,12 @@ void anoted_tree(Tree *body)
     {
         anoted_tree(body->child);
         anoted_tree(body->child->next);
+        // anoted_tree(body->next);
 
-        if (body->child->next->print != NULL)
-            if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0 || strcmp(body->child->print, "bool") != 0))
-                handle_semantic_errors(body->line, body->column, "=", body->child->print, body->child->next->print);
-            else
-                body->print = body->child->print;
+        if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0 || strcmp(body->child->print, "bool") != 0))
+            handle_semantic_errors(body->line, body->column, "=", body->child->print, body->child->next->print);
+        else
+            body->print = body->child->print;
     }
 
     else if (strcmp(body->token, "Mod") == 0)
@@ -373,7 +393,10 @@ void anoted_tree(Tree *body)
         anoted_tree(body->child->next);
 
         if (strcmp(body->child->print, body->child->next->print) != 0 && strcmp(body->child->print, "int") != 0)
+        {
             handle_semantic_errors(body->line, body->column, "%", body->child->print, body->child->next->print);
+            body->print = UNDEF;
+        }
         else
             body->print = body->child->print;
     }
@@ -384,7 +407,10 @@ void anoted_tree(Tree *body)
         anoted_tree(body->child->next);
 
         if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0))
+        {
             handle_semantic_errors(body->line, body->column, "+", body->child->print, body->child->next->print);
+            body->print = UNDEF;
+        }
         else
             body->print = body->child->print;
     }
@@ -395,7 +421,10 @@ void anoted_tree(Tree *body)
         anoted_tree(body->child->next);
 
         if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0))
+        {
             handle_semantic_errors(body->line, body->column, "-", body->child->print, body->child->next->print);
+            body->print = UNDEF;
+        }
         else
             body->print = body->child->print;
     }
@@ -405,7 +434,10 @@ void anoted_tree(Tree *body)
         anoted_tree(body->child);
         anoted_tree(body->child->next);
         if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0))
+        {
             handle_semantic_errors(body->line, body->column, "*", body->child->print, body->child->next->print);
+            body->print = UNDEF;
+        }
         else
             body->print = body->child->print;
     }
@@ -415,7 +447,10 @@ void anoted_tree(Tree *body)
         anoted_tree(body->child);
         anoted_tree(body->child->next);
         if (strcmp(body->child->print, body->child->next->print) != 0 && (strcmp(body->child->print, "int") != 0 || strcmp(body->child->print, "float32") != 0))
+        {
             handle_semantic_errors(body->line, body->column, "/", body->child->print, body->child->next->print);
+            body->print = UNDEF;
+        }
         else
             body->print = body->child->print;
     }
@@ -454,6 +489,7 @@ void anoted_tree(Tree *body)
         if (strcmp(body->child->print, "bool") != 0)
         {
             printf("Line %d, column %d: Incompatible type %s in if statement\n", body->line, body->column, body->child->print);
+            semantic_errors = 1;
         }
     }
 
@@ -465,6 +501,7 @@ void anoted_tree(Tree *body)
         if (strcmp(body->child->print, "bool") != 0)
         {
             printf("Line %d, column %d: Incompatible type %s in for statement\n", body->line, body->column, body->child->print);
+            semantic_errors = 1;
         }
     }
 
@@ -475,25 +512,32 @@ void anoted_tree(Tree *body)
         if (strcmp(body->child->print, "bool") != 0)
         {
             printf("Line %d, column %d: Operator %s cannot be applied to type %s\n", body->line, body->column, body->value, body->child->print);
+            semantic_errors = 1;
         }
     }
 
-    else
+    else if (strcmp(body->token, "Return") == 0)
     {
-        if (body->child && strcmp(body->token, "VarDecl") != 0)
-        {
-            anoted_tree(body->child);
-        }
+        anoted_tree(body->child);
     }
-    if (body->next)
+
+    else if (strcmp(body->token, "Print") == 0)
     {
+        anoted_tree(body->child);
+        anoted_tree(body->next);
+
+        anoted_tree(body->child->next);
+    }
+
+    else if (strcmp(body->token, "Block") == 0)
+    {
+        anoted_tree(body->child);
         anoted_tree(body->next);
     }
 }
 
-varDecl *check_id_simbols_table(char *value)
+varDecl *check_vars_global(char *value)
 {
-
     table_elem *aux = symbols_table;
 
     while (aux != NULL)
@@ -501,30 +545,13 @@ varDecl *check_id_simbols_table(char *value)
         if (aux->var)
         {
             varDecl *VarFind = aux->var;
-
-            if (strcmp(aux->var->value, value) == 0)
+            while (VarFind != NULL)
             {
-                return VarFind;
-            }
-        }
-        aux = aux->next;
-    }
-
-    aux = symbols_table;
-
-    while (aux != NULL)
-    {
-        if (aux->func)
-        {
-            varDecl *aux2 = aux->func->vars;
-
-            while (aux2 != NULL)
-            {
-                if (strcmp(value, aux2->value) == 0)
+                if (strcmp(aux->var->value, value) == 0)
                 {
-                    return aux2;
+                    return VarFind;
                 }
-                aux2 = aux2->next;
+                VarFind = VarFind->next;
             }
         }
         aux = aux->next;
@@ -556,7 +583,7 @@ funcDecl *check_func_simbols_table(char *value)
     return NULL;
 }
 
-varDecl *find_var_in_function(char *value)
+varDecl *find_var_in_function(Tree *head)
 {
     table_elem *aux = symbols_table;
 
@@ -568,7 +595,7 @@ varDecl *find_var_in_function(char *value)
 
             while (aux2 != NULL)
             {
-                if (strcmp(value, aux2->value) == 0)
+                if (strcmp(head->value, aux2->value) == 0 && (head->line > aux2->line))
                 {
                     return aux2;
                 }
@@ -582,34 +609,43 @@ varDecl *find_var_in_function(char *value)
 
 int check_params(Tree *call, funcDecl *func)
 {
-    Tree *aux = call;
-    varDecl *aux_vars_func = func->vars;
-    char *aux_string;
+    Tree *aux = call->child->next;
+    int i = 0;
+    int j = 0;
+    int isError = 0;
 
     while (aux != NULL)
     {
-        aux_vars_func = func->vars;
-        while (aux_vars_func != NULL)
-        {
-            if (aux_vars_func->isParam == 1)
-            {
-                aux_string = clear_string_to_error(aux->print);
-                printf("%s-------\n", aux_string);
-                if (strcmp(aux_string, aux_vars_func->type) != 0)
-                {
-                    return 1;
-                }
-            }
+        anoted_tree(aux);
 
-            aux_vars_func = aux_vars_func->next;
+        varDecl *aux2 = func->vars;
+
+        if (aux2->isParam == 0)
+        {
+            return 0;
         }
 
+        j = 0;
+        while (aux2 != NULL)
+        {
+            if (aux2->isParam == 1)
+            {
+                if (aux->print == NULL || (strcmp(aux->print, aux2->type) != 0 && i == j))
+                {
+                    isError = 1;
+                }
+            }
+            j++;
+            aux2 = aux2->next;
+        }
         aux = aux->next;
+        i++;
     }
-    return 0;
+
+    return isError;
 }
 
-int check_exist_token(char *string, int check)
+int check_exist_token(char *string)
 {
     table_elem *aux = symbols_table;
     if (symbols_table == NULL)
@@ -620,14 +656,14 @@ int check_exist_token(char *string, int check)
     {
         while (aux != NULL)
         {
-            if (aux->func && check == 0)
+            if (aux->func)
             {
                 if (strcmp(aux->func->value, string) == 0)
                 {
                     return 1;
                 }
             }
-            else if (aux->var && check == 1)
+            else if (aux->var)
             {
                 if (strcmp(aux->var->value, string) == 0)
                 {
@@ -682,11 +718,6 @@ char *string_params_func(varDecl *vars_params)
         return NULL;
     }
 
-    // if (aux->next == NULL)
-    // {
-    //     return aux->type;
-    // }
-
     while (aux != NULL)
     {
         if (aux->isParam == 1)
@@ -696,6 +727,35 @@ char *string_params_func(varDecl *vars_params)
             {
                 strcat(newString, ",");
             }
+        }
+        aux = aux->next;
+    }
+    return newString;
+}
+
+char *prepare_to_print_error_params(Tree *node, int posicion)
+{
+    char *newString = malloc(sizeof(char) * MAX_STRING);
+    Tree *aux = node->child->next;
+
+    if (aux == NULL)
+    {
+        return NULL;
+    }
+
+    while (aux != NULL)
+    {
+        if (aux->print == NULL)
+        {
+            strcat(newString, "none");
+        }
+        else
+        {
+            strcat(newString, aux->print);
+        }
+        if (aux->next != NULL)
+        {
+            strcat(newString, ",");
         }
         aux = aux->next;
     }
@@ -728,6 +788,7 @@ int handle_semantic_errors(int line, int column, char *symbol, char *value, char
         printf("Line %d, column %d: Operator %s cannot be applied to types %s, %s\n", line, column, symbol, value, value2);
         return 1;
     }
+    return 0;
 }
 
 char *clear_string_to_error(char *string)
@@ -743,7 +804,7 @@ char *clear_string_to_error(char *string)
         }
     }
 
-    printf("%s----------a\n", newString);
+    // printf("%s----------a\n", newString);
 
     return newString;
 }

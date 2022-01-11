@@ -27,7 +27,7 @@ typedef struct tree
     struct tree *child;
 } Tree;
 
-Tree *createNode(char *token, char *value, char *string);
+Tree *createNode(char *token, char *value, char *print); //, int line, int column);
 Tree *addchild(Tree *parent, Tree *value1, Tree *value2);
 Tree *addbro(Tree *head, Tree *bro);
 Tree *createFuncDecl(Tree *id, Tree *params, Tree *type, Tree *funcBody);
